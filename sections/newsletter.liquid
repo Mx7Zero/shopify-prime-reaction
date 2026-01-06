@@ -1,6 +1,18 @@
 {% comment %}
   Newsletter Section
   Email signup with Klaviyo/Seguno/Mailchimp compatibility
+  
+  Seguno Integration:
+  - Works automatically with Shopify's customer subscribe form
+  - Tags are passed to Seguno for segmentation
+  
+  Klaviyo Integration:
+  - Uses _learnq global for identify and track
+  - Add Klaviyo snippet to theme.liquid
+  
+  Mailchimp Integration:
+  - Uses mc global for tracking
+  - Tags sync via Shopify customer tags
 {% endcomment %}
 
 {%- liquid
@@ -9,20 +21,80 @@
     assign bg_class = 'newsletter--secondary'
   elsif section.settings.background_color == 'primary'
     assign bg_class = 'newsletter--primary'
+  elsif section.settings.background_color == 'accent'
+    assign bg_class = 'newsletter--accent'
+  endif
+  
+  assign layout_class = ''
+  if section.settings.layout == 'split'
+    assign layout_class = 'newsletter--split'
+  elsif section.settings.layout == 'inline'
+    assign layout_class = 'newsletter--inline'
+  endif
+  
+  assign has_image = false
+  if section.settings.image != blank
+    assign has_image = true
   endif
 -%}
 
-<section class="section newsletter {{ bg_class }}" data-section-id="{{ section.id }}">
+<section 
+  class="section newsletter {{ bg_class }} {{ layout_class }}{% if has_image %} newsletter--has-image{% endif %}" 
+  data-section-id="{{ section.id }}"
+  data-email-section="newsletter"
+>
   <div class="container">
     <div class="newsletter__inner" data-animate>
       
+      {%- if has_image -%}
+        <div class="newsletter__image">
+          {{ section.settings.image | image_url: width: 800 | image_tag:
+            loading: 'lazy',
+            class: 'newsletter__img',
+            alt: section.settings.heading
+          }}
+        </div>
+      {%- endif -%}
+      
       <div class="newsletter__content">
+        {%- if section.settings.icon != 'none' -%}
+          <div class="newsletter__icon">
+            {%- case section.settings.icon -%}
+              {%- when 'mail' -%}
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              {%- when 'gift' -%}
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <polyline points="20 12 20 22 4 22 4 12"/>
+                  <rect x="2" y="7" width="20" height="5"/>
+                  <line x1="12" y1="22" x2="12" y2="7"/>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+              {%- when 'bell' -%}
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+            {%- endcase -%}
+          </div>
+        {%- endif -%}
+        
         {%- if section.settings.heading != blank -%}
           <h2 class="newsletter__heading h2">{{ section.settings.heading }}</h2>
         {%- endif -%}
         
         {%- if section.settings.subheading != blank -%}
           <p class="newsletter__subheading">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+        
+        {%- comment -%} Incentive Badge {%- endcomment -%}
+        {%- if section.settings.show_incentive and section.settings.incentive_text != blank -%}
+          <div class="newsletter__incentive">
+            <span class="newsletter__incentive-badge">{{ section.settings.incentive_text }}</span>
+          </div>
         {%- endif -%}
       </div>
 
@@ -36,23 +108,43 @@
           
           {%- if form.posted_successfully? -%}
             <div class="newsletter__success" role="status">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              <p>{{ 'newsletter.success_message' | t | default: 'Thanks for subscribing!' }}</p>
+              <div class="newsletter__success-content">
+                <p class="newsletter__success-title">{{ 'newsletter.success_title' | t | default: "You're in!" }}</p>
+                <p class="newsletter__success-message">{{ 'newsletter.success_message' | t | default: 'Check your inbox for a welcome email.' }}</p>
+              </div>
             </div>
           {%- else -%}
             <div class="newsletter__form">
+              {%- if section.settings.collect_name -%}
+                <input 
+                  type="text" 
+                  name="contact[first_name]"
+                  placeholder="{{ 'newsletter.name_placeholder' | t | default: 'First name' }}"
+                  class="newsletter__input newsletter__input--name"
+                  autocomplete="given-name"
+                  aria-label="{{ 'newsletter.name_placeholder' | t | default: 'First name' }}"
+                >
+              {%- endif -%}
+              
               <input 
                 type="email" 
                 name="contact[email]"
                 placeholder="{{ 'newsletter.email_placeholder' | t | default: 'Enter your email' }}"
-                class="newsletter__input"
+                class="newsletter__input newsletter__input--email"
                 required
                 autocomplete="email"
                 aria-label="{{ 'newsletter.email_placeholder' | t | default: 'Enter your email' }}"
               >
-              <input type="hidden" name="contact[tags]" value="newsletter{% if section.settings.custom_tag != blank %}, {{ section.settings.custom_tag }}{% endif %}">
+              
+              {%- comment -%} Tags for segmentation {%- endcomment -%}
+              <input type="hidden" name="contact[tags]" value="newsletter{% if section.settings.custom_tag != blank %}, {{ section.settings.custom_tag }}{% endif %}{% if section.settings.segment_tag != blank %}, {{ section.settings.segment_tag }}{% endif %}">
+              
+              {%- comment -%} Hidden fields for email platform tracking {%- endcomment -%}
+              <input type="hidden" name="contact[note]" value="Source: {{ section.settings.source_name | default: 'Newsletter Section' }}">
+              
               <button type="submit" class="newsletter__button btn btn--primary">
                 <span class="btn-text">{{ section.settings.button_text | default: 'newsletter.subscribe' | t | default: 'Subscribe' }}</span>
                 <span class="btn-loading" hidden>
@@ -63,6 +155,16 @@
                 </span>
               </button>
             </div>
+            
+            {%- comment -%} SMS Opt-in (optional) {%- endcomment -%}
+            {%- if section.settings.enable_sms_optin -%}
+              <div class="newsletter__sms-optin">
+                <label class="newsletter__checkbox">
+                  <input type="checkbox" name="contact[accepts_marketing]" value="true" checked>
+                  <span class="newsletter__checkbox-text">{{ section.settings.sms_optin_text | default: 'Also receive SMS updates' }}</span>
+                </label>
+              </div>
+            {%- endif -%}
           {%- endif -%}
         {% endform %}
         
@@ -84,6 +186,19 @@
         {%- if section.settings.disclaimer != blank -%}
           <p class="newsletter__disclaimer">{{ section.settings.disclaimer }}</p>
         {%- endif -%}
+        
+        {%- comment -%} Social Proof {%- endcomment -%}
+        {%- if section.settings.show_subscriber_count and section.settings.subscriber_count != blank -%}
+          <p class="newsletter__social-proof">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            {{ section.settings.subscriber_count }} {{ 'newsletter.subscribers_joined' | t | default: 'subscribers and counting' }}
+          </p>
+        {%- endif -%}
       </div>
       
     </div>
@@ -104,9 +219,89 @@
     color: var(--color-text-inverse);
   }
   
+  .newsletter--accent {
+    background-color: var(--color-accent);
+    color: var(--color-text-inverse);
+  }
+  
+  .newsletter--has-image .newsletter__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    text-align: left;
+  }
+  
+  @media (min-width: 768px) {
+    .newsletter--has-image .newsletter__inner {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+  }
+  
+  .newsletter__image {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  
+  .newsletter__img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .newsletter--split .newsletter__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    text-align: left;
+  }
+  
+  @media (min-width: 768px) {
+    .newsletter--split .newsletter__inner {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+    
+    .newsletter--split .newsletter__form-wrapper {
+      justify-self: end;
+    }
+  }
+  
+  .newsletter--inline .newsletter__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    text-align: left;
+  }
+  
+  .newsletter--inline .newsletter__content {
+    flex: 1;
+    min-width: 280px;
+  }
+  
+  .newsletter--inline .newsletter__heading {
+    margin-bottom: var(--space-2);
+  }
+  
+  .newsletter--inline .newsletter__subheading {
+    margin-bottom: 0;
+  }
+  
   .newsletter__inner {
-    max-width: 640px;
+    max-width: 800px;
     margin: 0 auto;
+  }
+  
+  .newsletter__icon {
+    margin-bottom: var(--space-4);
+    color: var(--color-accent);
+  }
+  
+  .newsletter--primary .newsletter__icon,
+  .newsletter--accent .newsletter__icon {
+    color: white;
   }
   
   .newsletter__heading {
@@ -116,22 +311,51 @@
   .newsletter__subheading {
     font-size: var(--font-size-lg);
     color: var(--color-text-muted);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
   }
   
-  .newsletter--primary .newsletter__subheading {
+  .newsletter--primary .newsletter__subheading,
+  .newsletter--accent .newsletter__subheading {
     color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .newsletter__incentive {
+    margin-bottom: var(--space-6);
+  }
+  
+  .newsletter__incentive-badge {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-accent);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-full);
+  }
+  
+  .newsletter--primary .newsletter__incentive-badge,
+  .newsletter--accent .newsletter__incentive-badge {
+    background-color: white;
+    color: var(--color-primary);
   }
   
   .newsletter__form {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-3);
-    max-width: 480px;
+    max-width: 520px;
     margin: 0 auto;
+  }
+  
+  .newsletter--split .newsletter__form,
+  .newsletter--inline .newsletter__form,
+  .newsletter--has-image .newsletter__form {
+    margin: 0;
   }
   
   .newsletter__input {
     flex: 1;
+    min-width: 200px;
     padding: var(--space-4);
     font-size: var(--font-size-base);
     background-color: var(--color-background);
@@ -140,13 +364,20 @@
     transition: border-color var(--transition-fast);
   }
   
-  .newsletter--primary .newsletter__input {
+  .newsletter__input--name {
+    flex: 0 0 160px;
+    min-width: 120px;
+  }
+  
+  .newsletter--primary .newsletter__input,
+  .newsletter--accent .newsletter__input {
     background-color: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
     color: white;
   }
   
-  .newsletter--primary .newsletter__input::placeholder {
+  .newsletter--primary .newsletter__input::placeholder,
+  .newsletter--accent .newsletter__input::placeholder {
     color: rgba(255, 255, 255, 0.6);
   }
   
@@ -155,7 +386,8 @@
     border-color: var(--color-primary);
   }
   
-  .newsletter--primary .newsletter__input:focus {
+  .newsletter--primary .newsletter__input:focus,
+  .newsletter--accent .newsletter__input:focus {
     border-color: white;
   }
   
@@ -174,21 +406,74 @@
     color: white;
   }
   
+  .newsletter--accent .newsletter__button {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  
+  .newsletter__sms-optin {
+    margin-top: var(--space-4);
+  }
+  
+  .newsletter__checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+  }
+  
+  .newsletter__checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+  }
+  
+  .newsletter--primary .newsletter__checkbox-text,
+  .newsletter--accent .newsletter__checkbox-text {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
   .newsletter__disclaimer {
     margin-top: var(--space-4);
     font-size: var(--font-size-xs);
     color: var(--color-text-light);
   }
   
-  .newsletter--primary .newsletter__disclaimer {
+  .newsletter--primary .newsletter__disclaimer,
+  .newsletter--accent .newsletter__disclaimer {
     color: rgba(255, 255, 255, 0.6);
   }
   
   .newsletter__success {
-    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
     background-color: var(--color-success);
     color: white;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
+    text-align: left;
+  }
+  
+  .newsletter__success svg {
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    padding: var(--space-2);
+    width: 40px;
+    height: 40px;
+  }
+  
+  .newsletter__success-title {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-1);
+  }
+  
+  .newsletter__success-message {
+    opacity: 0.9;
+    font-size: var(--font-size-sm);
   }
   
   .newsletter__error {
@@ -208,6 +493,12 @@
     list-style: none;
     padding: 0;
   }
+  
+  .newsletter--split .newsletter__benefits,
+  .newsletter--inline .newsletter__benefits,
+  .newsletter--has-image .newsletter__benefits {
+    justify-content: flex-start;
+  }
 
   .newsletter__benefit {
     display: flex;
@@ -217,13 +508,39 @@
     color: var(--color-text-muted);
   }
 
-  .newsletter--primary .newsletter__benefit {
+  .newsletter--primary .newsletter__benefit,
+  .newsletter--accent .newsletter__benefit {
     color: rgba(255, 255, 255, 0.8);
   }
 
   .newsletter__benefit svg {
     color: var(--color-success);
     flex-shrink: 0;
+  }
+  
+  .newsletter--primary .newsletter__benefit svg,
+  .newsletter--accent .newsletter__benefit svg {
+    color: white;
+  }
+  
+  .newsletter__social-proof {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+  
+  .newsletter--split .newsletter__social-proof,
+  .newsletter--has-image .newsletter__social-proof {
+    justify-content: flex-start;
+  }
+  
+  .newsletter--primary .newsletter__social-proof,
+  .newsletter--accent .newsletter__social-proof {
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .newsletter__button .btn-loading {
@@ -243,6 +560,10 @@
       flex-direction: column;
     }
     
+    .newsletter__input--name {
+      flex: 1;
+    }
+    
     .newsletter__button {
       width: 100%;
     }
@@ -250,6 +571,11 @@
     .newsletter__benefits {
       flex-direction: column;
       align-items: center;
+    }
+    
+    .newsletter--split .newsletter__benefits,
+    .newsletter--has-image .newsletter__benefits {
+      align-items: flex-start;
     }
   }
 </style>
@@ -263,7 +589,9 @@
       form.addEventListener('submit', function(e) {
         const button = form.querySelector('button[type="submit"]');
         const emailInput = form.querySelector('[name="contact[email]"]');
+        const nameInput = form.querySelector('[name="contact[first_name]"]');
         const email = emailInput ? emailInput.value : '';
+        const firstName = nameInput ? nameInput.value : '';
         const source = form.dataset.source || 'newsletter';
         
         // Show loading state
@@ -274,28 +602,63 @@
           window.dataLayer.push({
             event: 'newsletter_signup',
             email_source: source,
-            method: 'form'
+            method: 'form',
+            has_first_name: !!firstName
           });
         }
 
         // Klaviyo tracking
         if (window._learnq) {
-          window._learnq.push(['identify', { $email: email }]);
+          const profile = { $email: email };
+          if (firstName) profile.$first_name = firstName;
+          
+          window._learnq.push(['identify', profile]);
           window._learnq.push(['track', 'Newsletter Signup', {
             source: source,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            page_url: window.location.href
           }]);
         }
 
-        // Seguno tracking
-        if (window.Seguno) {
-          window.Seguno.identify({ email: email });
+        // Seguno tracking - uses Shopify customer form, tags sync automatically
+        // Seguno listens for form submissions and syncs via Shopify customer API
+        if (window.Seguno && window.Seguno.identify) {
+          window.Seguno.identify({ 
+            email: email,
+            first_name: firstName,
+            source: source
+          });
         }
 
         // Mailchimp tracking
-        if (window.mc) {
-          window.mc.identify({ email: email });
+        if (window.mc && window.mc.identify) {
+          window.mc.identify({ 
+            email: email,
+            FNAME: firstName 
+          });
         }
+        
+        // HubSpot tracking
+        if (window._hsq) {
+          window._hsq.push(['identify', {
+            email: email,
+            firstname: firstName
+          }]);
+          window._hsq.push(['trackEvent', {
+            id: 'Newsletter Signup',
+            value: { source: source }
+          }]);
+        }
+        
+        // Custom event for other integrations
+        document.dispatchEvent(new CustomEvent('email:subscribe', {
+          detail: {
+            email: email,
+            firstName: firstName,
+            source: source,
+            form: form
+          }
+        }));
       });
     });
   })();
@@ -306,6 +669,22 @@
   "name": "Newsletter",
   "class": "section-newsletter",
   "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "mail", "label": "Mail" },
+        { "value": "gift", "label": "Gift" },
+        { "value": "bell", "label": "Bell" }
+      ],
+      "default": "none"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -319,16 +698,81 @@
       "default": "Subscribe for training tips, product launches, and exclusive offers."
     },
     {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Creates a split layout when set"
+    },
+    {
+      "type": "header",
+      "content": "Incentive"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_incentive",
+      "label": "Show incentive badge",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "incentive_text",
+      "label": "Incentive text",
+      "default": "Get 10% off your first order"
+    },
+    {
+      "type": "header",
+      "content": "Form"
+    },
+    {
       "type": "text",
       "id": "button_text",
       "label": "Button text",
       "default": "Subscribe"
     },
     {
+      "type": "checkbox",
+      "id": "collect_name",
+      "label": "Collect first name",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sms_optin",
+      "label": "Show SMS opt-in checkbox",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "sms_optin_text",
+      "label": "SMS opt-in text",
+      "default": "Also receive SMS updates"
+    },
+    {
+      "type": "header",
+      "content": "Email Platform Settings"
+    },
+    {
       "type": "text",
       "id": "custom_tag",
       "label": "Custom customer tag",
-      "info": "Optional tag to add to subscribers (e.g., 'footer-signup')"
+      "info": "Tag added to subscriber in Shopify (syncs to email platforms)"
+    },
+    {
+      "type": "text",
+      "id": "segment_tag",
+      "label": "Segment tag",
+      "info": "Additional tag for segmentation (e.g., 'training-interest')"
+    },
+    {
+      "type": "text",
+      "id": "source_name",
+      "label": "Source name",
+      "default": "Newsletter Section",
+      "info": "Identifies signup source in email platform"
+    },
+    {
+      "type": "header",
+      "content": "Benefits"
     },
     {
       "type": "checkbox",
@@ -337,10 +781,46 @@
       "default": true
     },
     {
+      "type": "header",
+      "content": "Social Proof"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subscriber_count",
+      "label": "Show subscriber count",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "subscriber_count",
+      "label": "Subscriber count text",
+      "default": "10,000+",
+      "info": "e.g., '10,000+' or 'Join 10,000 trainers'"
+    },
+    {
+      "type": "header",
+      "content": "Footer"
+    },
+    {
       "type": "text",
       "id": "disclaimer",
       "label": "Disclaimer text",
       "default": "By subscribing, you agree to receive marketing emails. Unsubscribe anytime."
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "stacked", "label": "Stacked (centered)" },
+        { "value": "split", "label": "Split (side by side)" },
+        { "value": "inline", "label": "Inline (compact)" }
+      ],
+      "default": "stacked"
     },
     {
       "type": "select",
@@ -349,7 +829,8 @@
       "options": [
         { "value": "default", "label": "Default" },
         { "value": "secondary", "label": "Secondary" },
-        { "value": "primary", "label": "Primary (dark)" }
+        { "value": "primary", "label": "Primary (dark)" },
+        { "value": "accent", "label": "Accent" }
       ],
       "default": "secondary"
     }
@@ -374,7 +855,7 @@
       "blocks": [
         { "type": "benefit", "settings": { "text": "Exclusive discounts" } },
         { "type": "benefit", "settings": { "text": "New product alerts" } },
-        { "type": "benefit", "settings": { "text": "Training tips" } }
+        { "type": "benefit", "settings": { "text": "Training tips & videos" } }
       ]
     }
   ]

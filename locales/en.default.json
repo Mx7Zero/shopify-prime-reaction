@@ -18,9 +18,12 @@
   "newsletter": {
     "title": "Newsletter",
     "email_placeholder": "Enter your email",
+    "name_placeholder": "First name",
     "subscribe": "Subscribe",
     "subscribed": "Subscribed!",
-    "success_message": "Thanks for subscribing! Check your inbox for updates."
+    "success_title": "You're in!",
+    "success_message": "Thanks for subscribing! Check your inbox for updates.",
+    "subscribers_joined": "subscribers and counting"
   },
   "popup": {
     "your_code": "Your code:",
@@ -104,7 +107,9 @@
         "email_placeholder": "Enter your email",
         "submit": "Notify Me",
         "privacy": "We'll only use this email to notify you.",
-        "success": "We'll email you when this item is back!"
+        "success_title": "You're on the list!",
+        "success": "We'll email you when this item is back!",
+        "error": "Something went wrong. Please try again."
       }
     }
   },
@@ -300,6 +305,33 @@
       "status_reviewed": "Reviewed",
       "status_approved": "Approved",
       "status_expired": "Expired"
+    },
+    "email_preferences": {
+      "title": "Email Preferences",
+      "description": "Manage your email subscriptions and communication preferences.",
+      "marketing": "Marketing Emails",
+      "newsletter": "Newsletter",
+      "newsletter_hint": "Product updates, training tips, and exclusive offers",
+      "promotions": "Promotions & Sales",
+      "promotions_hint": "Be first to know about special offers and discounts",
+      "new_products": "New Product Launches",
+      "new_products_hint": "Get notified when new products are available",
+      "transactional": "Order Updates",
+      "order_updates": "Order Confirmations & Shipping",
+      "order_updates_hint": "Required for order processing (cannot be disabled)",
+      "back_in_stock": "Back in Stock Alerts",
+      "back_in_stock_hint": "Get notified when items you wanted are available again",
+      "content": "Content & Education",
+      "training_tips": "Training Tips & Tutorials",
+      "training_tips_hint": "Workout guides, technique videos, and expert advice",
+      "blog_updates": "Blog & News",
+      "blog_updates_hint": "Industry news, research, and brand updates",
+      "save": "Save Preferences",
+      "success": "Your preferences have been saved!",
+      "error": "Something went wrong. Please try again.",
+      "unsubscribe_all": "Want to unsubscribe from all marketing emails?",
+      "unsubscribe_link": "Unsubscribe from all",
+      "unsubscribe_confirm": "Are you sure you want to unsubscribe from all marketing emails?"
     },
     "login": {
       "title": "Login",

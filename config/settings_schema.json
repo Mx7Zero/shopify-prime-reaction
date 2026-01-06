@@ -966,5 +966,167 @@
         "info": "Comma-separated list of popular search terms"
       }
     ]
+  },
+  {
+    "name": "Email Marketing",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Email Platform Integration"
+      },
+      {
+        "type": "select",
+        "id": "email_platform",
+        "label": "Primary email platform",
+        "options": [
+          { "value": "seguno", "label": "Seguno" },
+          { "value": "klaviyo", "label": "Klaviyo" },
+          { "value": "mailchimp", "label": "Mailchimp" },
+          { "value": "hubspot", "label": "HubSpot" },
+          { "value": "other", "label": "Other / Manual" }
+        ],
+        "default": "seguno",
+        "info": "Select your email marketing platform for enhanced tracking"
+      },
+      {
+        "type": "text",
+        "id": "klaviyo_public_key",
+        "label": "Klaviyo Public API Key",
+        "info": "Found in Klaviyo > Account > Settings > API Keys"
+      },
+      {
+        "type": "text",
+        "id": "bis_klaviyo_list_id",
+        "label": "Klaviyo Back in Stock List ID",
+        "info": "List ID for back in stock notifications"
+      },
+      {
+        "type": "header",
+        "content": "Popup Settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "popup_enabled",
+        "label": "Enable email popup",
+        "default": true
+      },
+      {
+        "type": "number",
+        "id": "popup_delay",
+        "label": "Popup delay (seconds)",
+        "default": 5,
+        "info": "Time before popup appears"
+      },
+      {
+        "type": "checkbox",
+        "id": "popup_exit_intent",
+        "label": "Show on exit intent",
+        "default": true,
+        "info": "Show popup when user moves to leave page"
+      },
+      {
+        "type": "range",
+        "id": "popup_scroll_trigger",
+        "min": 0,
+        "max": 100,
+        "step": 10,
+        "unit": "%",
+        "label": "Scroll trigger percentage",
+        "default": 50,
+        "info": "Show popup when user scrolls this far (0 = disabled)"
+      },
+      {
+        "type": "checkbox",
+        "id": "popup_show_once",
+        "label": "Show popup once per session",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "popup_hide_for_customers",
+        "label": "Hide for logged in customers",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "popup_cookie_days",
+        "min": 1,
+        "max": 30,
+        "step": 1,
+        "unit": "days",
+        "label": "Days before showing again",
+        "default": 7,
+        "info": "After dismissal, how long before popup can show again"
+      },
+      {
+        "type": "header",
+        "content": "Popup Content"
+      },
+      {
+        "type": "image_picker",
+        "id": "popup_image",
+        "label": "Popup image"
+      },
+      {
+        "type": "text",
+        "id": "popup_heading",
+        "label": "Heading",
+        "default": "Get 10% Off Your First Order"
+      },
+      {
+        "type": "textarea",
+        "id": "popup_subheading",
+        "label": "Subheading",
+        "default": "Subscribe to our newsletter and receive a discount code instantly."
+      },
+      {
+        "type": "text",
+        "id": "popup_discount_code",
+        "label": "Discount code to display",
+        "info": "Leave blank to hide discount code"
+      },
+      {
+        "type": "checkbox",
+        "id": "popup_collect_name",
+        "label": "Collect first name",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "popup_button_text",
+        "label": "Button text",
+        "default": "Get My Discount"
+      },
+      {
+        "type": "text",
+        "id": "popup_custom_tag",
+        "label": "Custom subscriber tag",
+        "info": "Tag added to subscribers from popup"
+      },
+      {
+        "type": "textarea",
+        "id": "popup_disclaimer",
+        "label": "Disclaimer text",
+        "default": "By subscribing, you agree to receive marketing emails. Unsubscribe anytime."
+      },
+      {
+        "type": "header",
+        "content": "Back in Stock Alerts"
+      },
+      {
+        "type": "checkbox",
+        "id": "bis_enabled",
+        "label": "Enable back in stock alerts",
+        "default": true,
+        "info": "Show signup form on out of stock products"
+      },
+      {
+        "type": "checkbox",
+        "id": "bis_auto_show",
+        "label": "Auto-expand on sold out products",
+        "default": true,
+        "info": "Automatically show the form when product is unavailable"
+      }
+    ]
   }
 ]

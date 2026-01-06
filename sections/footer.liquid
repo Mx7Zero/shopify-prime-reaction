@@ -50,13 +50,13 @@
       </div>
 
       {%- if section.settings.show_newsletter -%}
-        <div class="footer__newsletter">
+        <div class="footer__newsletter" data-email-section="footer">
           <h3 class="footer__newsletter-title">{{ section.settings.newsletter_title | default: 'Stay in the loop' }}</h3>
           {%- if section.settings.newsletter_text != blank -%}
             <p class="footer__newsletter-text">{{ section.settings.newsletter_text }}</p>
           {%- endif -%}
           
-          {% form 'customer', id: 'footer-newsletter' %}
+          {% form 'customer', id: 'footer-newsletter', class: 'newsletter-signup-form', data-source: 'footer' %}
             <div class="footer__newsletter-form">
               <input 
                 type="email" 
@@ -67,13 +67,29 @@
                 autocomplete="email"
                 aria-label="{{ 'general.newsletter.email_placeholder' | t }}"
               >
-              <input type="hidden" name="contact[tags]" value="newsletter">
+              <input type="hidden" name="contact[tags]" value="newsletter, footer-signup{% if section.settings.newsletter_tag != blank %}, {{ section.settings.newsletter_tag }}{% endif %}">
               <button type="submit" class="footer__newsletter-btn btn btn--primary">
-                {{ 'general.newsletter.subscribe' | t | default: 'Subscribe' }}
+                <span class="footer__newsletter-btn-text">{{ 'general.newsletter.subscribe' | t | default: 'Subscribe' }}</span>
+                <span class="footer__newsletter-btn-loading" hidden>
+                  <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+                    <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M12 2a10 10 0 0 1 10 10"/>
+                  </svg>
+                </span>
               </button>
             </div>
             {%- if form.posted_successfully? -%}
-              <p class="footer__newsletter-success">{{ 'general.newsletter.success' | t }}</p>
+              <p class="footer__newsletter-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                {{ 'general.newsletter.success' | t }}
+              </p>
+            {%- endif -%}
+            {%- if form.errors -%}
+              <p class="footer__newsletter-error">
+                {{ form.errors | default_errors }}
+              </p>
             {%- endif -%}
           {% endform %}
         </div>
@@ -235,6 +251,12 @@
       "id": "newsletter_text",
       "label": "Newsletter text",
       "default": "Subscribe for training tips, new product launches, and exclusive offers."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_tag",
+      "label": "Custom tag",
+      "info": "Additional tag for segmentation in email platform"
     },
     {
       "type": "header",

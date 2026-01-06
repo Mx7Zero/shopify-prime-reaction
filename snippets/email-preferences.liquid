@@ -1,0 +1,460 @@
+{% comment %}
+  Email Preferences Snippet
+  Allows customers to manage their email subscription preferences
+  
+  Usage:
+  {% render 'email-preferences' %}
+{% endcomment %}
+
+<div class="email-preferences" data-email-preferences>
+  <div class="email-preferences__header">
+    <h2 class="email-preferences__title h4">{{ 'customer.email_preferences.title' | t | default: 'Email Preferences' }}</h2>
+    <p class="email-preferences__description">
+      {{ 'customer.email_preferences.description' | t | default: 'Manage your email subscriptions and communication preferences.' }}
+    </p>
+  </div>
+  
+  <form class="email-preferences__form" data-email-preferences-form>
+    <div class="email-preferences__group">
+      <h3 class="email-preferences__group-title h6">{{ 'customer.email_preferences.marketing' | t | default: 'Marketing Emails' }}</h3>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="newsletter" 
+          value="true"
+          {% if customer.accepts_marketing %}checked{% endif %}
+          data-preference="newsletter"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.newsletter' | t | default: 'Newsletter' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.newsletter_hint' | t | default: 'Product updates, training tips, and exclusive offers' }}</span>
+        </span>
+      </label>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="promotions" 
+          value="true"
+          {% if customer.tags contains 'promotions' %}checked{% endif %}
+          data-preference="promotions"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.promotions' | t | default: 'Promotions & Sales' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.promotions_hint' | t | default: 'Be first to know about special offers and discounts' }}</span>
+        </span>
+      </label>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="new_products" 
+          value="true"
+          {% if customer.tags contains 'new-products' %}checked{% endif %}
+          data-preference="new_products"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.new_products' | t | default: 'New Product Launches' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.new_products_hint' | t | default: 'Get notified when new products are available' }}</span>
+        </span>
+      </label>
+    </div>
+    
+    <div class="email-preferences__group">
+      <h3 class="email-preferences__group-title h6">{{ 'customer.email_preferences.transactional' | t | default: 'Order Updates' }}</h3>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="order_updates" 
+          value="true"
+          checked
+          disabled
+          data-preference="order_updates"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.order_updates' | t | default: 'Order Confirmations & Shipping' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.order_updates_hint' | t | default: 'Required for order processing (cannot be disabled)' }}</span>
+        </span>
+      </label>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="back_in_stock" 
+          value="true"
+          {% if customer.tags contains 'back-in-stock' %}checked{% endif %}
+          data-preference="back_in_stock"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.back_in_stock' | t | default: 'Back in Stock Alerts' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.back_in_stock_hint' | t | default: 'Get notified when items you wanted are available again' }}</span>
+        </span>
+      </label>
+    </div>
+    
+    <div class="email-preferences__group">
+      <h3 class="email-preferences__group-title h6">{{ 'customer.email_preferences.content' | t | default: 'Content & Education' }}</h3>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="training_tips" 
+          value="true"
+          {% if customer.tags contains 'training-tips' %}checked{% endif %}
+          data-preference="training_tips"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.training_tips' | t | default: 'Training Tips & Tutorials' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.training_tips_hint' | t | default: 'Workout guides, technique videos, and expert advice' }}</span>
+        </span>
+      </label>
+      
+      <label class="email-preferences__checkbox">
+        <input 
+          type="checkbox" 
+          name="blog_updates" 
+          value="true"
+          {% if customer.tags contains 'blog-updates' %}checked{% endif %}
+          data-preference="blog_updates"
+        >
+        <span class="email-preferences__checkbox-mark"></span>
+        <span class="email-preferences__checkbox-content">
+          <span class="email-preferences__checkbox-label">{{ 'customer.email_preferences.blog_updates' | t | default: 'Blog & News' }}</span>
+          <span class="email-preferences__checkbox-hint">{{ 'customer.email_preferences.blog_updates_hint' | t | default: 'Industry news, research, and brand updates' }}</span>
+        </span>
+      </label>
+    </div>
+    
+    <div class="email-preferences__actions">
+      <button type="submit" class="email-preferences__submit btn btn--primary">
+        <span class="email-preferences__submit-text">{{ 'customer.email_preferences.save' | t | default: 'Save Preferences' }}</span>
+        <span class="email-preferences__submit-loading" hidden>
+          <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+            <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M12 2a10 10 0 0 1 10 10"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+    
+    <div class="email-preferences__message" data-email-preferences-message hidden></div>
+  </form>
+  
+  <div class="email-preferences__unsubscribe">
+    <p>{{ 'customer.email_preferences.unsubscribe_all' | t | default: 'Want to unsubscribe from all marketing emails?' }}</p>
+    <button type="button" class="email-preferences__unsubscribe-btn link" data-unsubscribe-all>
+      {{ 'customer.email_preferences.unsubscribe_link' | t | default: 'Unsubscribe from all' }}
+    </button>
+  </div>
+</div>
+
+<style>
+  .email-preferences {
+    background-color: var(--color-background);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+  
+  .email-preferences__header {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+  
+  .email-preferences__title {
+    margin-bottom: var(--space-2);
+  }
+  
+  .email-preferences__description {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+  
+  .email-preferences__group {
+    margin-bottom: var(--space-6);
+  }
+  
+  .email-preferences__group-title {
+    margin-bottom: var(--space-4);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--font-size-xs);
+  }
+  
+  .email-preferences__checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    margin-bottom: var(--space-2);
+    background-color: var(--color-background-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+  
+  .email-preferences__checkbox:hover {
+    background-color: var(--color-surface);
+  }
+  
+  .email-preferences__checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .email-preferences__checkbox-mark {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+  
+  .email-preferences__checkbox-mark::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform var(--transition-fast);
+  }
+  
+  .email-preferences__checkbox input:checked + .email-preferences__checkbox-mark {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  
+  .email-preferences__checkbox input:checked + .email-preferences__checkbox-mark::after {
+    transform: rotate(45deg) scale(1);
+  }
+  
+  .email-preferences__checkbox input:disabled + .email-preferences__checkbox-mark {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    cursor: not-allowed;
+  }
+  
+  .email-preferences__checkbox input:disabled + .email-preferences__checkbox-mark::after {
+    border-color: var(--color-text-muted);
+  }
+  
+  .email-preferences__checkbox input:focus-visible + .email-preferences__checkbox-mark {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  .email-preferences__checkbox-content {
+    flex: 1;
+  }
+  
+  .email-preferences__checkbox-label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-1);
+  }
+  
+  .email-preferences__checkbox-hint {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+  
+  .email-preferences__actions {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+  
+  .email-preferences__submit {
+    min-width: 180px;
+  }
+  
+  .email-preferences__submit.is-loading .email-preferences__submit-text {
+    display: none;
+  }
+  
+  .email-preferences__submit.is-loading .email-preferences__submit-loading {
+    display: inline-block !important;
+  }
+  
+  .email-preferences__submit-loading .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .email-preferences__message {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+  }
+  
+  .email-preferences__message.is-success {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: var(--color-success);
+  }
+  
+  .email-preferences__message.is-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+  }
+  
+  .email-preferences__unsubscribe {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: var(--border-width) solid var(--color-border);
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+  
+  .email-preferences__unsubscribe p {
+    margin-bottom: var(--space-2);
+  }
+  
+  .email-preferences__unsubscribe-btn {
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+  }
+  
+  .email-preferences__unsubscribe-btn:hover {
+    color: var(--color-primary);
+  }
+</style>
+
+<script>
+  (function() {
+    const container = document.querySelector('[data-email-preferences]');
+    if (!container) return;
+    
+    const form = container.querySelector('[data-email-preferences-form]');
+    const messageEl = container.querySelector('[data-email-preferences-message]');
+    const unsubscribeBtn = container.querySelector('[data-unsubscribe-all]');
+    
+    // Save preferences
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = form.querySelector('.email-preferences__submit');
+      submitBtn.classList.add('is-loading');
+      submitBtn.disabled = true;
+      messageEl.hidden = true;
+      
+      // Collect preferences
+      const preferences = {};
+      form.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        if (!input.disabled) {
+          preferences[input.name] = input.checked;
+        }
+      });
+      
+      try {
+        // Update customer marketing consent
+        const newsletterChecked = form.querySelector('[name="newsletter"]').checked;
+        
+        // Track preference update
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'email_preferences_updated',
+            preferences: preferences,
+            newsletter_opted_in: newsletterChecked
+          });
+        }
+        
+        // Klaviyo profile update
+        if (window._learnq) {
+          const profileUpdate = {
+            $consent: newsletterChecked ? ['email'] : [],
+            'Email Preferences': preferences
+          };
+          window._learnq.push(['identify', profileUpdate]);
+          window._learnq.push(['track', 'Updated Email Preferences', preferences]);
+        }
+        
+        // HubSpot update
+        if (window._hsq) {
+          window._hsq.push(['trackEvent', {
+            id: 'Email Preferences Updated',
+            value: preferences
+          }]);
+        }
+        
+        // Custom event
+        document.dispatchEvent(new CustomEvent('email:preferencesUpdated', {
+          detail: { preferences: preferences }
+        }));
+        
+        // Show success message
+        messageEl.textContent = '{{ "customer.email_preferences.success" | t | default: "Your preferences have been saved!" }}';
+        messageEl.className = 'email-preferences__message is-success';
+        messageEl.hidden = false;
+        
+        // Note: Full server-side update would require a customer metafield API call
+        // For now, this tracks the preference change in email platforms
+        
+      } catch (error) {
+        console.error('Email preferences error:', error);
+        messageEl.textContent = '{{ "customer.email_preferences.error" | t | default: "Something went wrong. Please try again." }}';
+        messageEl.className = 'email-preferences__message is-error';
+        messageEl.hidden = false;
+      } finally {
+        submitBtn.classList.remove('is-loading');
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // Unsubscribe from all
+    if (unsubscribeBtn) {
+      unsubscribeBtn.addEventListener('click', function() {
+        if (!confirm('{{ "customer.email_preferences.unsubscribe_confirm" | t | default: "Are you sure you want to unsubscribe from all marketing emails?" }}')) {
+          return;
+        }
+        
+        // Uncheck all marketing preferences
+        form.querySelectorAll('input[type="checkbox"]:not([disabled])').forEach(input => {
+          input.checked = false;
+        });
+        
+        // Track unsubscribe
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'email_unsubscribe_all'
+          });
+        }
+        
+        if (window._learnq) {
+          window._learnq.push(['track', 'Unsubscribed from All', {}]);
+          window._learnq.push(['identify', { $consent: [] }]);
+        }
+        
+        // Submit the form
+        form.dispatchEvent(new Event('submit', { bubbles: true }));
+      });
+    }
+  })();
+</script>

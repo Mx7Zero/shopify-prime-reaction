@@ -4,9 +4,12 @@
 
 {%- liquid
   assign show_quote_history = section.settings.show_quote_history
+  assign show_email_preferences = section.settings.show_email_preferences
   assign active_tab = 'orders'
   if request.path contains 'quotes'
     assign active_tab = 'quotes'
+  elsif request.path contains 'preferences'
+    assign active_tab = 'preferences'
   endif
 -%}
 
@@ -41,6 +44,16 @@
                 <line x1="16" y1="17" x2="8" y2="17"/>
               </svg>
               {{ 'customer.account.quotes' | t | default: 'Quote Requests' }}
+            </a>
+          {%- endif -%}
+          
+          {%- if show_email_preferences -%}
+            <a href="#preferences" class="customer-account__nav-link{% if active_tab == 'preferences' %} is-active{% endif %}" data-tab-trigger="preferences">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              {{ 'customer.account.email_preferences' | t | default: 'Email Preferences' }}
             </a>
           {%- endif -%}
           
@@ -146,6 +159,13 @@
             {% render 'quote-history' %}
           </div>
         {%- endif -%}
+        
+        {%- comment -%} Email Preferences Tab {%- endcomment -%}
+        {%- if show_email_preferences -%}
+          <div class="customer-account__tab{% if active_tab == 'preferences' %} is-active{% endif %}" data-tab="preferences">
+            {% render 'email-preferences' %}
+          </div>
+        {%- endif -%}
       </div>
     </div>
   </div>
@@ -199,6 +219,13 @@
       "label": "Show quote history tab",
       "default": true,
       "info": "Display quote request history for B2B customers"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_email_preferences",
+      "label": "Show email preferences tab",
+      "default": true,
+      "info": "Allow customers to manage email subscriptions"
     }
   ]
 }

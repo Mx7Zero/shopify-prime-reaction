@@ -2,6 +2,11 @@
   Back in Stock Notification Snippet
   Displays email signup form for out-of-stock products
   
+  Integrations:
+  - Klaviyo Back in Stock API
+  - Seguno (via Shopify customer tags)
+  - Custom webhook support
+  
   Usage:
   {% render 'back-in-stock', product: product, variant: current_variant %}
 {% endcomment %}
@@ -9,10 +14,19 @@
 {%- liquid
   assign variant = variant | default: product.selected_or_first_available_variant
   assign is_available = variant.available
+  assign bis_list_id = settings.bis_klaviyo_list_id
 -%}
 
 {%- unless is_available -%}
-  <div class="back-in-stock" data-back-in-stock>
+  <div 
+    class="back-in-stock" 
+    data-back-in-stock
+    data-product-id="{{ product.id }}"
+    data-variant-id="{{ variant.id }}"
+    data-product-title="{{ product.title | escape }}"
+    data-variant-title="{{ variant.title | escape }}"
+    data-product-handle="{{ product.handle }}"
+  >
     <div class="back-in-stock__header">
       <svg class="back-in-stock__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -25,9 +39,14 @@
       {{ 'products.product.back_in_stock.description' | t }}
     </p>
     
-    <form class="back-in-stock__form" data-back-in-stock-form action="/cart/add" method="post">
+    <form class="back-in-stock__form" data-back-in-stock-form>
       <input type="hidden" name="variant_id" value="{{ variant.id }}">
       <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="hidden" name="product_handle" value="{{ product.handle }}">
+      <input type="hidden" name="product_title" value="{{ product.title | escape }}">
+      <input type="hidden" name="variant_title" value="{{ variant.title | escape }}">
+      <input type="hidden" name="product_url" value="{{ shop.url }}{{ product.url }}">
+      <input type="hidden" name="product_image" value="{{ product.featured_image | image_url: width: 600 }}">
       
       <div class="back-in-stock__input-wrapper">
         <input 
@@ -41,6 +60,12 @@
         >
         <button type="submit" class="back-in-stock__button">
           <span class="back-in-stock__button-text">{{ 'products.product.back_in_stock.submit' | t }}</span>
+          <span class="back-in-stock__button-loading" hidden>
+            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+              <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M12 2a10 10 0 0 1 10 10"/>
+            </svg>
+          </span>
           <svg class="back-in-stock__button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"/>
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -57,96 +82,322 @@
       <svg class="back-in-stock__success-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
-      <p class="back-in-stock__success-message">
-        {{ 'products.product.back_in_stock.success' | t }}
-      </p>
+      <div class="back-in-stock__success-content">
+        <p class="back-in-stock__success-title">
+          {{ 'products.product.back_in_stock.success_title' | t | default: "You're on the list!" }}
+        </p>
+        <p class="back-in-stock__success-message">
+          {{ 'products.product.back_in_stock.success' | t }}
+        </p>
+      </div>
     </div>
     
     <div class="back-in-stock__error" data-back-in-stock-error hidden>
-      <p class="back-in-stock__error-message"></p>
+      <p class="back-in-stock__error-message" data-back-in-stock-error-message></p>
     </div>
   </div>
   
+  <style>
+    .back-in-stock {
+      padding: var(--space-5);
+      background-color: var(--color-background-secondary);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-4);
+    }
+    
+    .back-in-stock__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+    
+    .back-in-stock__icon {
+      color: var(--color-primary);
+    }
+    
+    .back-in-stock__title {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      margin: 0;
+    }
+    
+    .back-in-stock__description {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-4);
+    }
+    
+    .back-in-stock__input-wrapper {
+      display: flex;
+      gap: var(--space-2);
+    }
+    
+    .back-in-stock__input {
+      flex: 1;
+      padding: var(--space-3);
+      font-size: var(--font-size-sm);
+      border: var(--border-width) solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-background);
+    }
+    
+    .back-in-stock__input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+    
+    .back-in-stock__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-primary);
+      color: white;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+    
+    .back-in-stock__button:hover {
+      background-color: var(--color-primary-dark);
+    }
+    
+    .back-in-stock__button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .back-in-stock__button.is-loading .back-in-stock__button-text,
+    .back-in-stock__button.is-loading .back-in-stock__button-icon {
+      display: none;
+    }
+    
+    .back-in-stock__button.is-loading .back-in-stock__button-loading {
+      display: block !important;
+    }
+    
+    .back-in-stock__button-loading .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .back-in-stock__privacy {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-light);
+      margin-top: var(--space-3);
+    }
+    
+    .back-in-stock__success {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background-color: rgba(34, 197, 94, 0.1);
+      border-radius: var(--radius-sm);
+    }
+    
+    .back-in-stock__success-icon {
+      color: var(--color-success);
+      flex-shrink: 0;
+    }
+    
+    .back-in-stock__success-title {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+    
+    .back-in-stock__success-message {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+    
+    .back-in-stock__error {
+      padding: var(--space-3);
+      background-color: rgba(239, 68, 68, 0.1);
+      border-radius: var(--radius-sm);
+      margin-top: var(--space-3);
+    }
+    
+    .back-in-stock__error-message {
+      font-size: var(--font-size-sm);
+      color: var(--color-error);
+    }
+    
+    @media (max-width: 480px) {
+      .back-in-stock__input-wrapper {
+        flex-direction: column;
+      }
+      
+      .back-in-stock__button {
+        width: 100%;
+      }
+    }
+  </style>
+  
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('[data-back-in-stock-form]');
-      const successEl = document.querySelector('[data-back-in-stock-success]');
-      const errorEl = document.querySelector('[data-back-in-stock-error]');
+    (function() {
+      const containers = document.querySelectorAll('[data-back-in-stock]');
       
-      if (!form) return;
-      
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
+      containers.forEach(container => {
+        const form = container.querySelector('[data-back-in-stock-form]');
+        const successEl = container.querySelector('[data-back-in-stock-success]');
+        const errorEl = container.querySelector('[data-back-in-stock-error]');
+        const errorMessageEl = container.querySelector('[data-back-in-stock-error-message]');
         
-        const email = form.querySelector('[data-back-in-stock-email]').value;
-        const variantId = form.querySelector('[name="variant_id"]').value;
-        const productId = form.querySelector('[name="product_id"]').value;
-        const productTitle = form.closest('[data-product-title]')?.dataset.productTitle || document.title;
-        const variantTitle = form.closest('[data-variant-title]')?.dataset.variantTitle || '';
+        if (!form) return;
         
-        const button = form.querySelector('button[type="submit"]');
-        button.disabled = true;
-        button.classList.add('is-loading');
-        
-        // Store subscription in localStorage as backup
-        const subscriptions = JSON.parse(localStorage.getItem('backInStockSubscriptions') || '[]');
-        const subscription = {
-          email: email,
-          variantId: variantId,
-          productId: productId,
-          productTitle: productTitle,
-          variantTitle: variantTitle,
-          date: new Date().toISOString()
-        };
-        
-        const existing = subscriptions.find(s => s.email === email && s.variantId === variantId);
-        if (!existing) {
-          subscriptions.push(subscription);
-          localStorage.setItem('backInStockSubscriptions', JSON.stringify(subscriptions));
-        }
-        
-        // Push to data layer for GTM/analytics
-        if (window.dataLayer) {
-          window.dataLayer.push({
-            event: 'back_in_stock_signup',
-            product_id: productId,
-            variant_id: variantId,
-            product_title: productTitle
-          });
-        }
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const email = form.querySelector('[data-back-in-stock-email]').value;
+          const variantId = form.querySelector('[name="variant_id"]').value;
+          const productId = form.querySelector('[name="product_id"]').value;
+          const productTitle = container.dataset.productTitle;
+          const variantTitle = container.dataset.variantTitle;
+          const productUrl = form.querySelector('[name="product_url"]').value;
+          const productImage = form.querySelector('[name="product_image"]').value;
+          
+          const button = form.querySelector('button[type="submit"]');
+          button.disabled = true;
+          button.classList.add('is-loading');
+          errorEl.hidden = true;
+          
+          try {
+            // Store subscription in localStorage as backup
+            const subscriptions = JSON.parse(localStorage.getItem('backInStockSubscriptions') || '[]');
+            const subscription = {
+              email: email,
+              variantId: variantId,
+              productId: productId,
+              productTitle: productTitle,
+              variantTitle: variantTitle,
+              productUrl: productUrl,
+              date: new Date().toISOString()
+            };
+            
+            const existing = subscriptions.find(s => s.email === email && s.variantId === variantId);
+            if (!existing) {
+              subscriptions.push(subscription);
+              localStorage.setItem('backInStockSubscriptions', JSON.stringify(subscriptions));
+            }
+            
+            // Push to data layer for GTM/GA4
+            if (window.dataLayer) {
+              window.dataLayer.push({
+                event: 'back_in_stock_signup',
+                product_id: productId,
+                variant_id: variantId,
+                product_title: productTitle
+              });
+            }
 
-        // Klaviyo Back in Stock integration
-        if (window._learnq) {
-          window._learnq.push(['identify', { $email: email }]);
-          window._learnq.push(['track', 'Back In Stock Signup', {
-            ProductID: productId,
-            VariantID: variantId,
-            ProductName: productTitle,
-            VariantName: variantTitle
-          }]);
-        }
-
-        // Klaviyo BIS API (if configured)
-        const klaviyoKey = window.klaviyoBISKey;
-        if (klaviyoKey) {
-          fetch('https://a.klaviyo.com/api/v2/list/' + klaviyoKey + '/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              profiles: [{ email: email }]
-            })
-          }).catch(() => {});
-        }
-        
-        // Show success message
-        form.hidden = true;
-        successEl.hidden = false;
-        
-        // Announce to screen readers
-        if (window.announceToScreenReader) {
-          window.announceToScreenReader('You will be notified when this product is back in stock.');
-        }
+            // Klaviyo Back in Stock integration
+            if (window._learnq) {
+              // Identify the user
+              window._learnq.push(['identify', { $email: email }]);
+              
+              // Track the signup
+              window._learnq.push(['track', 'Back In Stock Signup', {
+                ProductID: productId,
+                VariantID: variantId,
+                ProductName: productTitle,
+                VariantName: variantTitle,
+                ProductURL: productUrl,
+                ImageURL: productImage
+              }]);
+            }
+            
+            // Klaviyo Back in Stock API (if list ID configured)
+            {%- if settings.bis_klaviyo_list_id != blank -%}
+            const klaviyoListId = '{{ settings.bis_klaviyo_list_id }}';
+            if (klaviyoListId) {
+              try {
+                await fetch('https://a.klaviyo.com/onsite/components/back-in-stock/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    a: '{{ settings.klaviyo_public_key | default: "" }}',
+                    email: email,
+                    variant: variantId,
+                    product: productId,
+                    platform: 'shopify'
+                  })
+                });
+              } catch (klaviyoError) {
+                console.warn('Klaviyo BIS API error:', klaviyoError);
+              }
+            }
+            {%- endif -%}
+            
+            // Seguno - Create customer with tag for BIS tracking
+            // Seguno syncs via Shopify customer tags
+            try {
+              const formData = new FormData();
+              formData.append('form_type', 'customer');
+              formData.append('utf8', '✓');
+              formData.append('customer[email]', email);
+              formData.append('customer[tags]', `back-in-stock, bis-${productId}, bis-variant-${variantId}`);
+              formData.append('customer[note]', `Back in Stock: ${productTitle} - ${variantTitle}`);
+              
+              await fetch('/contact', {
+                method: 'POST',
+                body: formData
+              });
+            } catch (segunoError) {
+              console.warn('Seguno/Customer tag error:', segunoError);
+            }
+            
+            // HubSpot tracking
+            if (window._hsq) {
+              window._hsq.push(['identify', { email: email }]);
+              window._hsq.push(['trackEvent', {
+                id: 'Back In Stock Signup',
+                value: {
+                  product_id: productId,
+                  product_title: productTitle
+                }
+              }]);
+            }
+            
+            // Custom event for other integrations
+            document.dispatchEvent(new CustomEvent('backInStock:subscribe', {
+              detail: {
+                email: email,
+                productId: productId,
+                variantId: variantId,
+                productTitle: productTitle,
+                variantTitle: variantTitle
+              }
+            }));
+            
+            // Show success message
+            form.hidden = true;
+            successEl.hidden = false;
+            
+            // Announce to screen readers
+            if (window.announceToScreenReader) {
+              window.announceToScreenReader('{{ "products.product.back_in_stock.success" | t | escape }}');
+            }
+            
+          } catch (error) {
+            console.error('Back in stock signup error:', error);
+            errorMessageEl.textContent = '{{ "products.product.back_in_stock.error" | t | default: "Something went wrong. Please try again." }}';
+            errorEl.hidden = false;
+          } finally {
+            button.disabled = false;
+            button.classList.remove('is-loading');
+          }
+        });
       });
-    });
+    })();
   </script>
 {%- endunless -%}

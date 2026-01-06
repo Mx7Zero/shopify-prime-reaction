@@ -370,9 +370,20 @@
         setTimeout(() => firstInput.focus(), 100);
       }
 
-      // Analytics
+      // Analytics - GTM/GA4
       if (window.dataLayer) {
-        window.dataLayer.push({ event: 'popup_shown' });
+        window.dataLayer.push({ 
+          event: 'popup_shown',
+          popup_type: 'email_capture',
+          trigger_method: config.exitIntent ? 'exit_intent' : (config.scrollTrigger > 0 ? 'scroll' : 'timer')
+        });
+      }
+      
+      // Klaviyo popup view tracking
+      if (window._learnq) {
+        window._learnq.push(['track', 'Popup Viewed', {
+          popup_type: 'email_capture'
+        }]);
       }
     }
 
@@ -445,8 +456,71 @@
         navigator.clipboard.writeText(this.textContent).then(() => {
           const original = this.textContent;
           this.textContent = 'Copied!';
+          
+          // Track code copy
+          if (window.dataLayer) {
+            window.dataLayer.push({ 
+              event: 'discount_code_copied',
+              discount_code: original
+            });
+          }
+          
           setTimeout(() => { this.textContent = original; }, 1500);
         });
+      });
+    }
+    
+    // Form submission tracking
+    const form = popup.querySelector('.popup__form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        const emailInput = form.querySelector('[name="contact[email]"]');
+        const nameInput = form.querySelector('[name="contact[first_name]"]');
+        const email = emailInput ? emailInput.value : '';
+        const firstName = nameInput ? nameInput.value : '';
+        
+        // GTM/GA4
+        if (window.dataLayer) {
+          window.dataLayer.push({
+            event: 'popup_signup',
+            email_source: 'popup',
+            has_discount: !!popup.querySelector('[data-copy-code]')
+          });
+        }
+        
+        // Klaviyo
+        if (window._learnq) {
+          const profile = { $email: email };
+          if (firstName) profile.$first_name = firstName;
+          
+          window._learnq.push(['identify', profile]);
+          window._learnq.push(['track', 'Popup Signup', {
+            source: 'exit_intent_popup',
+            has_discount: !!popup.querySelector('[data-copy-code]'),
+            timestamp: new Date().toISOString()
+          }]);
+        }
+        
+        // HubSpot
+        if (window._hsq) {
+          window._hsq.push(['identify', {
+            email: email,
+            firstname: firstName
+          }]);
+          window._hsq.push(['trackEvent', {
+            id: 'Popup Signup'
+          }]);
+        }
+        
+        // Custom event
+        document.dispatchEvent(new CustomEvent('email:subscribe', {
+          detail: {
+            email: email,
+            firstName: firstName,
+            source: 'popup',
+            form: form
+          }
+        }));
       });
     }
 

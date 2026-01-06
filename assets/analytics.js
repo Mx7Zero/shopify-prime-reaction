@@ -1,6 +1,7 @@
 /**
  * Analytics Data Layer
  * GTM/GA4 event tracking and email platform integration
+ * Supports: Klaviyo, Seguno, Mailchimp, HubSpot
  */
 
 (function() {
@@ -24,6 +25,8 @@
       this.setupSearchTracking();
       this.setupCartTracking();
       this.setupQuoteTracking();
+      this.setupEmailTracking();
+      this.setupBrowseAbandonmentTracking();
     }
 
     /**
@@ -377,6 +380,190 @@
           });
         }
       });
+    }
+
+    /**
+     * Email platform tracking
+     * Integrates with Klaviyo, Seguno, Mailchimp, HubSpot
+     */
+    setupEmailTracking() {
+      // Listen for all email signup events
+      document.addEventListener('email:subscribe', (e) => {
+        const { email, firstName, source, form } = e.detail || {};
+        
+        this.push('email_subscribe', {
+          email_source: source,
+          has_first_name: !!firstName
+        });
+
+        // Klaviyo
+        this.trackKlaviyoSubscribe(email, firstName, source);
+        
+        // HubSpot
+        this.trackHubSpotSubscribe(email, firstName, source);
+        
+        // Seguno - Uses Shopify customer form, syncs automatically
+      });
+      
+      // Back in Stock subscriptions
+      document.addEventListener('backInStock:subscribe', (e) => {
+        const { email, productId, variantId, productTitle, variantTitle } = e.detail || {};
+        
+        this.push('back_in_stock_signup', {
+          product_id: productId,
+          variant_id: variantId,
+          product_title: productTitle
+        });
+        
+        this.trackKlaviyoBIS(email, productId, variantId, productTitle, variantTitle);
+      });
+      
+      // Email preference updates
+      document.addEventListener('email:preferencesUpdated', (e) => {
+        const { preferences } = e.detail || {};
+        
+        this.push('email_preferences_updated', {
+          preferences: preferences
+        });
+      });
+    }
+    
+    /**
+     * Klaviyo specific tracking
+     */
+    trackKlaviyoSubscribe(email, firstName, source) {
+      if (!window._learnq) return;
+      
+      const profile = { $email: email };
+      if (firstName) profile.$first_name = firstName;
+      
+      window._learnq.push(['identify', profile]);
+      window._learnq.push(['track', 'Newsletter Signup', {
+        source: source,
+        timestamp: new Date().toISOString()
+      }]);
+    }
+    
+    trackKlaviyoBIS(email, productId, variantId, productTitle, variantTitle) {
+      if (!window._learnq) return;
+      
+      window._learnq.push(['identify', { $email: email }]);
+      window._learnq.push(['track', 'Back In Stock Signup', {
+        ProductID: productId,
+        VariantID: variantId,
+        ProductName: productTitle,
+        VariantName: variantTitle
+      }]);
+    }
+    
+    /**
+     * HubSpot specific tracking
+     */
+    trackHubSpotSubscribe(email, firstName, source) {
+      if (!window._hsq) return;
+      
+      window._hsq.push(['identify', {
+        email: email,
+        firstname: firstName
+      }]);
+      window._hsq.push(['trackEvent', {
+        id: 'Newsletter Signup',
+        value: { source: source }
+      }]);
+    }
+    
+    /**
+     * Browse abandonment tracking for email platforms
+     */
+    setupBrowseAbandonmentTracking() {
+      // Track product views for browse abandonment
+      if (document.body.classList.contains('template-product')) {
+        this.trackBrowseAbandonment();
+      }
+      
+      // Track collection views
+      if (document.body.classList.contains('template-collection')) {
+        this.trackCollectionBrowse();
+      }
+    }
+    
+    trackBrowseAbandonment() {
+      const productJson = document.querySelector('[data-product-json]');
+      if (!productJson) return;
+      
+      try {
+        const product = JSON.parse(productJson.textContent);
+        
+        // Klaviyo viewed product (for browse abandonment flows)
+        if (window._learnq) {
+          window._learnq.push(['track', 'Viewed Product', {
+            ProductID: product.id,
+            ProductName: product.title,
+            ProductURL: window.location.href,
+            ImageURL: product.featured_image,
+            Brand: product.vendor,
+            Price: product.price / 100,
+            Categories: [product.type],
+            CompareAtPrice: product.compare_at_price ? product.compare_at_price / 100 : null
+          }]);
+        }
+        
+        // HubSpot product view
+        if (window._hsq) {
+          window._hsq.push(['trackEvent', {
+            id: 'Viewed Product',
+            value: {
+              product_id: product.id,
+              product_name: product.title,
+              price: product.price / 100
+            }
+          }]);
+        }
+        
+        // Store in session for abandonment tracking
+        const viewedProducts = JSON.parse(sessionStorage.getItem('viewedProducts') || '[]');
+        const exists = viewedProducts.find(p => p.id === product.id);
+        if (!exists) {
+          viewedProducts.push({
+            id: product.id,
+            title: product.title,
+            url: window.location.href,
+            image: product.featured_image,
+            price: product.price / 100,
+            viewedAt: new Date().toISOString()
+          });
+          // Keep last 10 viewed products
+          if (viewedProducts.length > 10) viewedProducts.shift();
+          sessionStorage.setItem('viewedProducts', JSON.stringify(viewedProducts));
+        }
+      } catch (e) {
+        console.warn('Analytics: Error tracking browse abandonment', e);
+      }
+    }
+    
+    trackCollectionBrowse() {
+      const collectionTitle = document.querySelector('.collection-header__title, h1')?.textContent;
+      const collectionHandle = window.location.pathname.split('/').pop();
+      
+      // Klaviyo collection view
+      if (window._learnq && collectionTitle) {
+        window._learnq.push(['track', 'Viewed Collection', {
+          CollectionName: collectionTitle.trim(),
+          CollectionHandle: collectionHandle,
+          URL: window.location.href
+        }]);
+      }
+      
+      // HubSpot collection view
+      if (window._hsq && collectionTitle) {
+        window._hsq.push(['trackEvent', {
+          id: 'Viewed Collection',
+          value: {
+            collection_name: collectionTitle.trim(),
+            collection_handle: collectionHandle
+          }
+        }]);
+      }
     }
   }
 
