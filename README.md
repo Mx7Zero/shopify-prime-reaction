@@ -76,15 +76,22 @@ The Reaxing theme embodies a premium, editorial aesthetic perfect for showcasing
 
 ```
 reaxing-theme/
-├── assets/                    # Stylesheets & JavaScript
+├── assets/                    # Stylesheets & JavaScript (30 files)
 │   ├── animations.css         # All animations & micro-interactions
 │   ├── base.css               # Reset & base styles
 │   ├── cart.css               # Cart page styles
 │   ├── collection.css         # Collection page styles
 │   ├── customer.css           # Customer account styles
+│   ├── facility-locator.css   # Gym finder map styles
+│   ├── footer.css             # Footer styles
+│   ├── header.css             # Header styles
+│   ├── hero.css               # Hero section styles
 │   ├── pages.css              # Supporting page styles
+│   ├── product-card.css       # Product card styles
 │   ├── product-main.css       # Product page styles
+│   ├── search.css             # Search styles
 │   ├── skeleton.css           # Loading skeleton states
+│   ├── training-library.css   # Training library styles
 │   ├── typography.css         # Font & text styles
 │   ├── variables.css          # CSS custom properties
 │   ├── analytics.js           # Analytics & email tracking
@@ -94,10 +101,12 @@ reaxing-theme/
 │   ├── global.js              # Site-wide functionality
 │   ├── lazy-load.js           # Image/video lazy loading
 │   ├── liquid-effects.js      # Water/fluid motion effects
+│   ├── product-card.js        # Product card hover/video
 │   ├── quick-view.js          # Quick view modal
 │   ├── quiz.js                # Product finder quiz
 │   ├── quote-system.js        # B2B quote system
-│   └── search.js              # Predictive search
+│   ├── search.js              # Predictive search
+│   └── theme-toggle.js        # Dark/light mode toggle
 │
 ├── config/
 │   ├── settings_data.json     # Theme settings values
@@ -109,74 +118,111 @@ reaxing-theme/
 ├── locales/
 │   └── en.default.json        # English translations
 │
-├── sections/                  # Customizable sections
+├── sections/                  # Customizable sections (40 files)
+│   ├── 404.liquid
 │   ├── announcement-bar.liquid
-│   ├── header.liquid
-│   ├── footer.liquid
-│   ├── hero-slideshow.liquid
-│   ├── bento-grid.liquid
-│   ├── featured-collection.liquid
-│   ├── science-explainer.liquid
-│   ├── product-main.liquid
-│   ├── product-comparison.liquid
-│   ├── related-products.liquid
-│   ├── collection-template.liquid
-│   ├── collection-hero.liquid
+│   ├── bento-grid.liquid      # Dynamic asymmetric grid
+│   ├── brand-values.liquid
+│   ├── cart-drawer.liquid
 │   ├── cart-drawer-ajax.liquid
 │   ├── cart-main.liquid
-│   ├── quote-modal.liquid
-│   ├── quote-drawer.liquid
-│   ├── quote-form.liquid
-│   ├── quiz.liquid
+│   ├── collection-banner.liquid
+│   ├── collection-grid.liquid
+│   ├── collection-hero.liquid # Category banners
+│   ├── contact-form.liquid
+│   ├── facility-locator.liquid
+│   ├── faq.liquid
+│   ├── featured-collection.liquid
+│   ├── featured-products.liquid
+│   ├── footer.liquid
+│   ├── header.liquid
+│   ├── hero.liquid
+│   ├── image-with-text.liquid
+│   ├── marquee.liquid
 │   ├── newsletter.liquid
+│   ├── page-banner.liquid
 │   ├── popup.liquid
 │   ├── predictive-search.liquid
-│   ├── facility-locator.liquid
+│   ├── product-comparison.liquid # Visual size/weight comparison
+│   ├── product-description.liquid
+│   ├── product-main.liquid
+│   ├── quick-view.liquid
+│   ├── quiz.liquid
+│   ├── quote-drawer.liquid
+│   ├── quote-form.liquid
+│   ├── quote-modal.liquid
+│   ├── related-products.liquid
+│   ├── reviews.liquid         # Customer reviews with media
+│   ├── rich-text.liquid
+│   ├── science-explainer.liquid # SDI technology explainer
+│   ├── search-results.liquid
 │   ├── training-library.liquid
-│   ├── reviews.liquid
 │   └── customer-*.liquid      # 8 customer account sections
 │
-├── snippets/                  # Reusable components
+├── snippets/                  # Reusable components (28 files)
 │   ├── accessibility.liquid   # Skip links, ARIA
+│   ├── add-to-cart.liquid     # Add to cart with quantity
+│   ├── address-form.liquid    # Customer address form
 │   ├── back-in-stock.liquid   # Restock alert form
+│   ├── back-to-top.liquid     # Scroll to top button
 │   ├── b2b-detect.liquid      # B2B customer detection
 │   ├── b2b-toggle.liquid      # Quote mode toggle
+│   ├── cart-line-item.liquid  # Cart item component
+│   ├── cart-note.liquid       # Order notes
+│   ├── cart-quote.liquid      # Convert cart to RFQ
+│   ├── cart-trust.liquid      # Trust badges
+│   ├── cart-upsells.liquid    # Smart recommendations
+│   ├── collection-empty.liquid # Empty collection state
 │   ├── critical-css.liquid    # Inline critical styles
 │   ├── email-preferences.liquid # Subscription management
 │   ├── facets.liquid          # Filter drawer
-│   ├── json-ld.liquid         # Structured data
+│   ├── json-ld.liquid         # Structured data schemas
+│   ├── marquee.liquid         # Scrolling text
 │   ├── mega-menu.liquid       # Navigation dropdown
-│   ├── mobile-nav.liquid      # Mobile navigation
+│   ├── meta-tags.liquid       # Meta tag output
+│   ├── mobile-nav.liquid      # Mobile bottom navigation
 │   ├── performance.liquid     # Resource hints, Web Vitals
-│   ├── price.liquid           # Price display logic
+│   ├── price.liquid           # Price display
+│   ├── price-display.liquid   # B2B price visibility
 │   ├── product-card.liquid    # Product card component
+│   ├── product-gallery.liquid # Product image gallery
+│   ├── product-price.liquid   # Product pricing
 │   ├── quick-view.liquid      # Quick view modal
 │   ├── quote-button.liquid    # Quote CTA button
+│   ├── quote-confirmation.liquid # Quote success
+│   ├── quote-history.liquid   # Past quotes (B2B)
+│   ├── scroll-progress.liquid # Page scroll indicator
 │   ├── seo.liquid             # OG & Twitter meta
-│   └── ...more
+│   ├── seo-meta.liquid        # SEO meta tags
+│   ├── shipping-calc.liquid   # Shipping estimator
+│   └── variant-picker.liquid  # Variant selection
 │
-└── templates/                 # Page templates (JSON)
-    ├── index.json
-    ├── product.json
-    ├── collection.json
-    ├── cart.json
-    ├── search.json
+└── templates/                 # Page templates (JSON - 18 files)
     ├── 404.json
+    ├── cart.json
+    ├── collection.json
+    ├── index.json
     ├── page.json
     ├── page.about.json
     ├── page.contact.json
     ├── page.faq.json
-    ├── page.training.json
+    ├── page.quiz.json
+    ├── page.quote.json
     ├── page.shipping.json
-    └── customers/
+    ├── page.training.json
+    ├── product.json
+    ├── search.json
+    └── customers/             # Customer account templates
         ├── account.json
+        ├── activate_account.json
         ├── addresses.json
         ├── login.json
-        ├── register.json
         ├── order.json
-        ├── reset_password.json
-        └── activate_account.json
+        ├── register.json
+        └── reset_password.json
 ```
+
+**Total: 120+ files** across all theme directories.
 
 ---
 
