@@ -1,0 +1,229 @@
+{% comment %}
+  SEO - Search Engine Optimization
+  Comprehensive SEO snippet including Open Graph, Twitter Cards, and meta tags
+  
+  Include in theme.liquid <head>:
+  {% render 'seo' %}
+{% endcomment %}
+
+{%- liquid
+  # ==========================================================================
+  # SEO VARIABLES
+  # ==========================================================================
+  
+  # Page title
+  assign seo_title = page_title
+  if template.name == 'index'
+    assign seo_title = shop.name
+    if shop.description != blank
+      assign seo_title = shop.name | append: ' | ' | append: shop.description | truncate: 60
+    endif
+  endif
+  assign seo_title = seo_title | truncate: 70
+
+  # Description
+  assign seo_description = page_description | default: shop.description | strip_html | truncate: 160
+
+  # Image - prioritize page-specific images
+  assign seo_image = null
+  assign seo_image_width = 1200
+  assign seo_image_height = 630
+  
+  if template.name == 'product'
+    assign seo_image = product.featured_image | image_url: width: 1200
+    assign seo_image_alt = product.featured_image.alt | default: product.title
+  elsif template.name == 'collection'
+    if collection.image != blank
+      assign seo_image = collection.image | image_url: width: 1200
+      assign seo_image_alt = collection.image.alt | default: collection.title
+    endif
+  elsif template.name == 'article'
+    if article.image != blank
+      assign seo_image = article.image | image_url: width: 1200
+      assign seo_image_alt = article.image.alt | default: article.title
+    endif
+  elsif template.name == 'blog'
+    if blog.image != blank
+      assign seo_image = blog.image | image_url: width: 1200
+      assign seo_image_alt = blog.image.alt | default: blog.title
+    endif
+  elsif template.name == 'page'
+    if page.image != blank
+      assign seo_image = page.image | image_url: width: 1200
+      assign seo_image_alt = page.image.alt | default: page.title
+    endif
+  endif
+  
+  # Fallback to site share image
+  if seo_image == blank and settings.share_image != blank
+    assign seo_image = settings.share_image | image_url: width: 1200
+    assign seo_image_alt = settings.share_image.alt | default: shop.name
+  endif
+
+  # Canonical URL
+  assign seo_url = canonical_url | default: request.origin | append: request.path
+
+  # Keywords (from product tags or page metafields)
+  assign seo_keywords = ''
+  if template.name == 'product' and product.tags.size > 0
+    assign seo_keywords = product.tags | join: ', '
+  elsif template.name == 'collection' and collection.tags.size > 0
+    assign seo_keywords = collection.tags | join: ', '
+  endif
+-%}
+
+{%- comment -%} ========== Essential Meta Tags ========== {%- endcomment -%}
+<meta name="description" content="{{ seo_description }}">
+<meta name="author" content="{{ shop.name }}">
+{%- if seo_keywords != blank -%}
+<meta name="keywords" content="{{ seo_keywords }}">
+{%- endif -%}
+
+{%- comment -%} ========== Open Graph Protocol ========== {%- endcomment -%}
+<meta property="og:site_name" content="{{ shop.name }}">
+<meta property="og:title" content="{{ seo_title }}">
+<meta property="og:description" content="{{ seo_description }}">
+<meta property="og:url" content="{{ seo_url }}">
+<meta property="og:locale" content="{{ request.locale.iso_code | replace: '-', '_' }}">
+
+{%- if seo_image != blank -%}
+<meta property="og:image" content="{{ seo_image }}">
+<meta property="og:image:secure_url" content="{{ seo_image }}">
+<meta property="og:image:width" content="{{ seo_image_width }}">
+<meta property="og:image:height" content="{{ seo_image_height }}">
+{%- if seo_image_alt != blank -%}
+<meta property="og:image:alt" content="{{ seo_image_alt }}">
+{%- endif -%}
+{%- endif -%}
+
+{%- comment -%} OG Type based on template {%- endcomment -%}
+{%- case template.name -%}
+  {%- when 'product' -%}
+<meta property="og:type" content="product">
+<meta property="product:price:amount" content="{{ product.price | money_without_currency }}">
+<meta property="product:price:currency" content="{{ cart.currency.iso_code }}">
+{%- if product.available -%}
+<meta property="product:availability" content="in stock">
+{%- else -%}
+<meta property="product:availability" content="out of stock">
+{%- endif -%}
+{%- if product.vendor != blank -%}
+<meta property="product:brand" content="{{ product.vendor }}">
+{%- endif -%}
+{%- if product.selected_or_first_available_variant.sku != blank -%}
+<meta property="product:retailer_item_id" content="{{ product.selected_or_first_available_variant.sku }}">
+{%- endif -%}
+
+  {%- when 'article' -%}
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="{{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' }}">
+<meta property="article:modified_time" content="{{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' }}">
+<meta property="article:author" content="{{ article.author }}">
+{%- for tag in article.tags limit: 5 -%}
+<meta property="article:tag" content="{{ tag }}">
+{%- endfor -%}
+{%- if blog.title != blank -%}
+<meta property="article:section" content="{{ blog.title }}">
+{%- endif -%}
+
+  {%- when 'blog' -%}
+<meta property="og:type" content="blog">
+
+  {%- else -%}
+<meta property="og:type" content="website">
+{%- endcase -%}
+
+{%- comment -%} ========== Twitter Card ========== {%- endcomment -%}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo_title }}">
+<meta name="twitter:description" content="{{ seo_description }}">
+{%- if seo_image != blank -%}
+<meta name="twitter:image" content="{{ seo_image }}">
+{%- if seo_image_alt != blank -%}
+<meta name="twitter:image:alt" content="{{ seo_image_alt }}">
+{%- endif -%}
+{%- endif -%}
+
+{%- comment -%} Twitter handle from settings {%- endcomment -%}
+{%- if settings.social_twitter != blank -%}
+  {%- liquid
+    assign twitter_url = settings.social_twitter
+    assign twitter_handle = twitter_url | split: 'twitter.com/' | last | split: 'x.com/' | last | split: '?' | first | prepend: '@'
+  -%}
+<meta name="twitter:site" content="{{ twitter_handle }}">
+<meta name="twitter:creator" content="{{ twitter_handle }}">
+{%- endif -%}
+
+{%- comment -%} Product-specific Twitter tags {%- endcomment -%}
+{%- if template.name == 'product' -%}
+<meta name="twitter:label1" content="Price">
+<meta name="twitter:data1" content="{{ product.price | money_with_currency }}">
+<meta name="twitter:label2" content="Availability">
+<meta name="twitter:data2" content="{% if product.available %}In Stock{% else %}Out of Stock{% endif %}">
+{%- endif -%}
+
+{%- comment -%} ========== Additional Meta Tags ========== {%- endcomment -%}
+{%- comment -%} Theme Color (for browser chrome) {%- endcomment -%}
+<meta name="theme-color" content="{{ settings.color_primary | default: '#1a1a1a' }}" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="{{ settings.color_background_dark | default: '#1a1a1a' }}" media="(prefers-color-scheme: dark)">
+<meta name="msapplication-TileColor" content="{{ settings.color_primary | default: '#1a1a1a' }}">
+<meta name="msapplication-navbutton-color" content="{{ settings.color_primary | default: '#1a1a1a' }}">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+{%- comment -%} ========== Robots Directives ========== {%- endcomment -%}
+{%- if template.name == 'search' or template.name == 'cart' or request.path contains '/challenge' -%}
+<meta name="robots" content="noindex, follow">
+{%- elsif template.name == 'collection' and current_tags -%}
+<meta name="robots" content="noindex, follow">
+{%- elsif template.name == 'collection' and current_page > 1 -%}
+<meta name="robots" content="noindex, follow">
+{%- endif -%}
+
+{%- comment -%} Pagination - prev/next for collections {%- endcomment -%}
+{%- if paginate -%}
+  {%- if paginate.previous -%}
+<link rel="prev" href="{{ paginate.previous.url }}">
+  {%- endif -%}
+  {%- if paginate.next -%}
+<link rel="next" href="{{ paginate.next.url }}">
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ========== Site Verification ========== {%- endcomment -%}
+{%- if settings.google_site_verification != blank -%}
+<meta name="google-site-verification" content="{{ settings.google_site_verification }}">
+{%- endif -%}
+{%- if settings.bing_site_verification != blank -%}
+<meta name="msvalidate.01" content="{{ settings.bing_site_verification }}">
+{%- endif -%}
+{%- if settings.pinterest_site_verification != blank -%}
+<meta name="p:domain_verify" content="{{ settings.pinterest_site_verification }}">
+{%- endif -%}
+{%- if settings.yandex_site_verification != blank -%}
+<meta name="yandex-verification" content="{{ settings.yandex_site_verification }}">
+{%- endif -%}
+
+{%- comment -%} ========== Facebook Domain Verification ========== {%- endcomment -%}
+{%- if settings.facebook_domain_verification != blank -%}
+<meta name="facebook-domain-verification" content="{{ settings.facebook_domain_verification }}">
+{%- endif -%}
+
+{%- comment -%} ========== Geo Tags (for local SEO) ========== {%- endcomment -%}
+{%- if settings.enable_local_business_schema and settings.business_city != blank -%}
+<meta name="geo.region" content="{{ settings.business_country }}-{{ settings.business_state }}">
+<meta name="geo.placename" content="{{ settings.business_city }}">
+{%- endif -%}
+
+{%- comment -%} ========== Alternate Languages (if applicable) ========== {%- endcomment -%}
+{%- if shop.published_locales.size > 1 -%}
+  {%- for locale in shop.published_locales -%}
+<link rel="alternate" hreflang="{{ locale.iso_code }}" href="{{ shop.url }}{{ request.path }}?locale={{ locale.iso_code }}">
+  {%- endfor -%}
+<link rel="alternate" hreflang="x-default" href="{{ shop.url }}{{ request.path }}">
+{%- endif -%}
+
+{%- comment -%} ========== Pinterest Rich Pins ========== {%- endcomment -%}
+{%- if template.name == 'product' -%}
+<meta property="pinterest:price:amount" content="{{ product.price | money_without_currency }}">
+<meta property="pinterest:price:currency" content="{{ cart.currency.iso_code }}">
+{%- endif -%}

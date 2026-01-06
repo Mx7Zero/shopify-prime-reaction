@@ -4,6 +4,17 @@
   
   Include in theme.liquid before </head>:
   {% render 'json-ld' %}
+  
+  Schemas included:
+  - Organization
+  - WebSite with SearchAction
+  - BreadcrumbList
+  - Product with AggregateOffer
+  - Article
+  - CollectionPage with ItemList
+  - FAQPage
+  - LocalBusiness (optional)
+  - VideoObject (for product videos)
 {% endcomment %}
 
 {%- comment -%} Organization Schema {%- endcomment -%}
@@ -11,16 +22,25 @@
 {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "{{ shop.url }}#organization",
   "name": {{ shop.name | json }},
   "url": {{ shop.url | json }},
   {%- if settings.logo != blank -%}
-  "logo": {{ settings.logo | image_url: width: 500 | json }},
+  "logo": {
+    "@type": "ImageObject",
+    "url": {{ settings.logo | image_url: width: 500 | json }},
+    "width": 500,
+    "height": 500
+  },
   {%- endif -%}
   {%- if shop.phone != blank -%}
   "telephone": {{ shop.phone | json }},
   {%- endif -%}
   {%- if shop.email != blank -%}
   "email": {{ shop.email | json }},
+  {%- endif -%}
+  {%- if settings.business_description != blank -%}
+  "description": {{ settings.business_description | json }},
   {%- endif -%}
   "sameAs": [
     {%- if settings.social_facebook != blank -%}{{ settings.social_facebook | json }},{%- endif -%}
@@ -29,7 +49,18 @@
     {%- if settings.social_youtube != blank -%}{{ settings.social_youtube | json }},{%- endif -%}
     {%- if settings.social_linkedin != blank -%}{{ settings.social_linkedin | json }},{%- endif -%}
     {%- if settings.social_tiktok != blank -%}{{ settings.social_tiktok | json }}{%- endif -%}
-  ]
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    {%- if shop.email != blank -%}
+    "email": {{ shop.email | json }},
+    {%- endif -%}
+    {%- if shop.phone != blank -%}
+    "telephone": {{ shop.phone | json }},
+    {%- endif -%}
+    "availableLanguage": {{ request.locale.iso_code | json }}
+  }
 }
 </script>
 
@@ -290,4 +321,107 @@
 }
 </script>
   {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ItemList Schema for Collection Products {%- endcomment -%}
+{%- if template.name == 'collection' and collection.products.size > 0 -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ collection.title | json }},
+  "description": {{ collection.description | strip_html | truncate: 200 | json }},
+  "url": {{ collection.url | prepend: shop.url | json }},
+  "numberOfItems": {{ collection.products_count }},
+  "itemListElement": [
+    {%- for product in collection.products limit: 20 -%}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.index }},
+      "item": {
+        "@type": "Product",
+        "name": {{ product.title | json }},
+        "url": {{ product.url | prepend: shop.url | json }},
+        {%- if product.featured_image -%}
+        "image": {{ product.featured_image | image_url: width: 800 | json }},
+        {%- endif -%}
+        "offers": {
+          "@type": "Offer",
+          "price": {{ product.price | money_without_currency | json }},
+          "priceCurrency": {{ cart.currency.iso_code | json }},
+          "availability": "{% if product.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+        }
+      }
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+</script>
+{%- endif -%}
+
+{%- comment -%} VideoObject Schema for Product Videos {%- endcomment -%}
+{%- if template.name == 'product' -%}
+  {%- for media in product.media -%}
+    {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": {{ product.title | append: ' - Video' | json }},
+  "description": {{ product.description | strip_html | truncate: 200 | json }},
+  {%- if media.media_type == 'video' -%}
+  "contentUrl": {{ media.sources[0].url | json }},
+  "thumbnailUrl": {{ media.preview_image | image_url: width: 800 | json }},
+  "duration": "PT{{ media.duration | divided_by: 1000 }}S",
+  {%- elsif media.media_type == 'external_video' -%}
+  "embedUrl": "{% if media.host == 'youtube' %}https://www.youtube.com/embed/{{ media.external_id }}{% elsif media.host == 'vimeo' %}https://player.vimeo.com/video/{{ media.external_id }}{% endif %}",
+  "thumbnailUrl": {{ media.preview_image | image_url: width: 800 | json }},
+  {%- endif -%}
+  "uploadDate": {{ product.created_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }}
+}
+</script>
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- comment -%} HowTo Schema for Training Pages {%- endcomment -%}
+{%- if template.suffix == 'training' and page.content contains '<h3>' -%}
+  {%- assign steps = page.content | split: '<h3>' -%}
+  {%- if steps.size > 1 -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": {{ page.title | json }},
+  "description": {{ page.content | strip_html | truncate: 200 | json }},
+  "step": [
+    {%- for step in steps offset: 1 -%}
+      {%- assign step_name = step | split: '</h3>' | first | strip_html -%}
+      {%- assign step_text = step | split: '</h3>' | last | strip_html | truncate: 300 -%}
+      {%- if step_name != blank -%}
+    {
+      "@type": "HowToStep",
+      "position": {{ forloop.index }},
+      "name": {{ step_name | json }},
+      "text": {{ step_text | json }}
+    }{% unless forloop.last %},{% endunless %}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} SiteNavigationElement Schema {%- endcomment -%}
+{%- if template.name == 'index' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SiteNavigationElement",
+  "name": "Main Navigation",
+  "url": {{ shop.url | json }}
+}
+</script>
 {%- endif -%}

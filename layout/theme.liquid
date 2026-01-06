@@ -16,8 +16,11 @@
     <meta name="description" content="{{ page_description | escape }}">
   {% endif %}
 
+  {% comment %} Performance - Resource hints and preloading {% endcomment %}
+  {% render 'performance' %}
+
   {% comment %} SEO Meta Tags - Open Graph, Twitter Cards {% endcomment %}
-  {% render 'seo-meta' %}
+  {% render 'seo' %}
 
   {% comment %} JSON-LD Structured Data {% endcomment %}
   {% render 'json-ld' %}
@@ -155,6 +158,11 @@
   <script src="{{ 'lazy-load.js' | asset_url }}" defer></script>
   <script src="{{ 'cart-drawer.js' | asset_url }}" defer></script>
   <script src="{{ 'quick-view.js' | asset_url }}" defer></script>
+
+  {% comment %} Liquid Effects - Water/fluid animations {% endcomment %}
+  {%- if settings.enable_liquid_effects -%}
+    <script src="{{ 'liquid-effects.js' | asset_url }}" defer></script>
+  {%- endif -%}
 
   {% comment %} Analytics & Tracking {% endcomment %}
   {%- if settings.enable_analytics_tracking -%}

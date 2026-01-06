@@ -1,275 +1,634 @@
-# Reaxing Prime Reaction - Shopify Theme
+# 🏋️ Reaxing Prime Reaction - Shopify Theme
 
-> Editorial, typography-forward Shopify theme inspired by [postfamiliar.com](https://postfamiliar.com/)  
+> **Premium Shopify Theme for Neuromuscular Training Equipment**  
+> Editorial, typography-forward design inspired by [postfamiliar.com](https://postfamiliar.com/)  
 > For [prime-reaction-3.myshopify.com](https://prime-reaction-3.myshopify.com/)
+
+![Shopify](https://img.shields.io/badge/Shopify-Online%20Store%202.0-7AB55C?style=flat&logo=shopify)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)
+
+---
 
 ## 🎨 Design Philosophy
 
-- **Bold serif headlines** (Instrument Serif) with clean sans-serif body text (Inter)
-- **Generous whitespace** and minimal aesthetic
-- **Dark/Light mode** with system preference detection
-- **Smooth animations** and scroll effects with reduced motion support
-- **Clean product cards** with hover effects and quick view
-- **B2B Ready** with quote request system
+The Reaxing theme embodies a premium, editorial aesthetic perfect for showcasing high-end fitness equipment:
 
-## ✨ Features
+- **Bold Serif Headlines** — Instrument Serif for impactful headers
+- **Clean Sans-Serif Body** — Inter for excellent readability
+- **Generous Whitespace** — Let products breathe
+- **Fluid Motion Effects** — Water/liquid animations matching the Fluiball brand
+- **Dark/Light Mode** — Premium gym aesthetic with system preference detection
+- **Mobile-First** — Responsive design that works on all devices
 
-### Core
-- 📱 **Mobile-first responsive design** - Works beautifully on all devices
-- 🌙 **Dark/Light mode** - Respects system preferences with manual toggle
-- ♿ **Accessible** - WCAG 2.1 compliant with skip links, ARIA, keyboard navigation
-- 🔍 **SEO optimized** - Open Graph, Twitter Cards, JSON-LD structured data
-- ⚡ **Performance focused** - Critical CSS, lazy loading, skeleton states
+---
 
-### E-commerce
-- 🛒 **AJAX cart drawer** - No page reloads, smooth animations
-- 👁️ **Quick view** - View products without leaving the page
-- 🔎 **Faceted filtering** - Filter by price, vendor, tags
-- 📄 **Infinite scroll & load more** - For collection pages
-- 📧 **Quote system** - B2B quote requests with form
+## ✨ Feature Highlights
 
-### Customer
-- 👤 **Full customer accounts** - Login, register, orders, addresses
-- 📬 **Contact & FAQ pages** - With customizable sections
-- 🔍 **Predictive search** - Products, pages, articles
+### 🛍️ E-commerce Features
+- **AJAX Cart Drawer** — Seamless shopping without page reloads
+- **Quick View Modal** — Preview products without leaving the page
+- **Faceted Filtering** — Filter by price, vendor, tags with AJAX updates
+- **Infinite Scroll** — Load more products automatically
+- **Back in Stock Alerts** — Email notifications when products return
+- **Product Comparison** — Visual weight/size comparison tools
+
+### 💼 B2B Features
+- **Quote Request System** — Full RFQ workflow for business customers
+- **Hide Prices Option** — "Request Quote" instead of prices
+- **B2B Customer Detection** — Tag-based customer segmentation
+- **Quote Cart** — Convert cart items to quote requests
+- **Company Information Capture** — Business details on quotes
+
+### 📧 Email Marketing
+- **Multi-Platform Support** — Seguno, Klaviyo, Mailchimp, HubSpot
+- **Newsletter Sections** — Multiple layout options
+- **Exit Intent Popup** — Capture emails before visitors leave
+- **Browse Abandonment** — Track and recover abandoned sessions
+- **Customer Preferences** — Subscription management in account
+
+### ⚡ Performance
+- **Critical CSS** — Inline above-the-fold styles
+- **Lazy Loading** — Images, videos, iframes on demand
+- **Skeleton States** — Visual loading placeholders
+- **Core Web Vitals** — LCP, FID, CLS tracking
+- **Connection-Aware** — Adapt to network conditions
+- **Resource Hints** — Prefetch, preconnect, preload
+
+### ♿ Accessibility
+- **WCAG 2.1 AA** — Full compliance
+- **Skip Links** — Jump to main content
+- **ARIA Labels** — Screen reader support
+- **Focus Management** — Visible focus indicators
+- **Reduced Motion** — Respects user preferences
+- **Keyboard Navigation** — Full keyboard support
+
+### 🔍 SEO
+- **Open Graph Tags** — Facebook/social sharing
+- **Twitter Cards** — Rich Twitter previews
+- **JSON-LD Schemas** — Organization, Product, Article, FAQ, HowTo
+- **Canonical URLs** — Proper pagination handling
+- **Site Verification** — Google, Bing, Pinterest, Yandex
+
+---
 
 ## 📁 Theme Structure
 
 ```
-├── assets/                 # CSS, JS, images
-│   ├── animations.css      # All animations & transitions
-│   ├── base.css            # Reset & base styles
-│   ├── cart.css            # Cart page styles
-│   ├── collection.css      # Collection page styles
-│   ├── customer.css        # Customer account styles
-│   ├── pages.css           # Supporting page styles
-│   ├── product-main.css    # Product page styles
-│   ├── skeleton.css        # Loading skeleton states
-│   ├── typography.css      # Font & text styles
-│   ├── variables.css       # CSS custom properties
-│   ├── cart-drawer.js      # AJAX cart functionality
+reaxing-theme/
+├── assets/                    # Stylesheets & JavaScript
+│   ├── animations.css         # All animations & micro-interactions
+│   ├── base.css               # Reset & base styles
+│   ├── cart.css               # Cart page styles
+│   ├── collection.css         # Collection page styles
+│   ├── customer.css           # Customer account styles
+│   ├── pages.css              # Supporting page styles
+│   ├── product-main.css       # Product page styles
+│   ├── skeleton.css           # Loading skeleton states
+│   ├── typography.css         # Font & text styles
+│   ├── variables.css          # CSS custom properties
+│   ├── analytics.js           # Analytics & email tracking
+│   ├── cart-drawer.js         # AJAX cart functionality
 │   ├── collection-pagination.js  # Load more / infinite scroll
-│   ├── facets.js           # AJAX filtering & sorting
-│   ├── global.js           # Site-wide functionality
-│   ├── lazy-load.js        # Image/video lazy loading
-│   ├── quick-view.js       # Quick view modal
-│   └── quote-system.js     # Quote request system
+│   ├── facets.js              # AJAX filtering & sorting
+│   ├── global.js              # Site-wide functionality
+│   ├── lazy-load.js           # Image/video lazy loading
+│   ├── liquid-effects.js      # Water/fluid motion effects
+│   ├── quick-view.js          # Quick view modal
+│   ├── quiz.js                # Product finder quiz
+│   ├── quote-system.js        # B2B quote system
+│   └── search.js              # Predictive search
 │
 ├── config/
-│   ├── settings_data.json  # Theme settings values
-│   └── settings_schema.json # Theme settings definitions
+│   ├── settings_data.json     # Theme settings values
+│   └── settings_schema.json   # Theme settings definitions
 │
 ├── layout/
-│   └── theme.liquid        # Main theme wrapper
+│   └── theme.liquid           # Main theme wrapper
 │
 ├── locales/
-│   └── en.default.json     # English translations
+│   └── en.default.json        # English translations
 │
-├── sections/               # Customizable sections
+├── sections/                  # Customizable sections
 │   ├── announcement-bar.liquid
 │   ├── header.liquid
 │   ├── footer.liquid
 │   ├── hero-slideshow.liquid
+│   ├── bento-grid.liquid
 │   ├── featured-collection.liquid
+│   ├── science-explainer.liquid
 │   ├── product-main.liquid
+│   ├── product-comparison.liquid
+│   ├── related-products.liquid
 │   ├── collection-template.liquid
+│   ├── collection-hero.liquid
 │   ├── cart-drawer-ajax.liquid
+│   ├── cart-main.liquid
 │   ├── quote-modal.liquid
-│   ├── customer-*.liquid   # 8 customer account sections
+│   ├── quote-drawer.liquid
+│   ├── quote-form.liquid
+│   ├── quiz.liquid
+│   ├── newsletter.liquid
+│   ├── popup.liquid
+│   ├── predictive-search.liquid
+│   ├── facility-locator.liquid
+│   ├── training-library.liquid
+│   ├── reviews.liquid
+│   └── customer-*.liquid      # 8 customer account sections
+│
+├── snippets/                  # Reusable components
+│   ├── accessibility.liquid   # Skip links, ARIA
+│   ├── back-in-stock.liquid   # Restock alert form
+│   ├── b2b-detect.liquid      # B2B customer detection
+│   ├── b2b-toggle.liquid      # Quote mode toggle
+│   ├── critical-css.liquid    # Inline critical styles
+│   ├── email-preferences.liquid # Subscription management
+│   ├── facets.liquid          # Filter drawer
+│   ├── json-ld.liquid         # Structured data
+│   ├── mega-menu.liquid       # Navigation dropdown
+│   ├── mobile-nav.liquid      # Mobile navigation
+│   ├── performance.liquid     # Resource hints, Web Vitals
+│   ├── price.liquid           # Price display logic
+│   ├── product-card.liquid    # Product card component
+│   ├── quick-view.liquid      # Quick view modal
+│   ├── quote-button.liquid    # Quote CTA button
+│   ├── seo.liquid             # OG & Twitter meta
 │   └── ...more
 │
-├── snippets/               # Reusable components
-│   ├── accessibility.liquid # Skip links, ARIA
-│   ├── critical-css.liquid  # Inline critical styles
-│   ├── facets.liquid        # Filter drawer
-│   ├── json-ld.liquid       # Structured data
-│   ├── product-card.liquid  # Product card component
-│   ├── quick-view.liquid    # Quick view modal
-│   ├── quote-button.liquid  # Quote CTA button
-│   ├── seo-meta.liquid      # OG & Twitter meta
-│   └── ...more
-│
-└── templates/              # Page templates (JSON)
+└── templates/                 # Page templates (JSON)
     ├── index.json
     ├── product.json
     ├── collection.json
     ├── cart.json
-    ├── page.*.json         # Contact, FAQ, About
-    ├── 404.json
     ├── search.json
-    └── customers/          # Customer account templates
+    ├── 404.json
+    ├── page.json
+    ├── page.about.json
+    ├── page.contact.json
+    ├── page.faq.json
+    ├── page.training.json
+    ├── page.shipping.json
+    └── customers/
+        ├── account.json
+        ├── addresses.json
+        ├── login.json
+        ├── register.json
+        ├── order.json
+        ├── reset_password.json
+        └── activate_account.json
 ```
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Shopify Partner account or development store
-- Node.js 18+ (for local development)
+- Node.js 18+ (for local development with Shopify CLI)
+- Git (for version control)
 
-### Connect to Shopify
+### Option 1: GitHub Integration (Recommended)
 
-1. Go to **Shopify Admin** → **Online Store** → **Themes**
-2. Click **Add theme** → **Connect from GitHub**
-3. Select this repository and the `main` branch
-4. Changes auto-deploy to preview theme
+1. **Fork or clone this repository**
+   ```bash
+   git clone https://github.com/Mx7Zero/shopify-prime-reaction.git
+   ```
 
-### Local Development
+2. **Connect to Shopify**
+   - Go to **Shopify Admin** → **Online Store** → **Themes**
+   - Click **Add theme** → **Connect from GitHub**
+   - Authorize Shopify and select this repository
+   - Choose the `main` branch
+
+3. **Auto-sync**
+   - Changes pushed to `main` automatically deploy to your preview theme
+   - Test in preview, then **Publish** when ready
+
+### Option 2: Shopify CLI (Local Development)
 
 ```bash
 # Install Shopify CLI
 npm install -g @shopify/cli @shopify/theme
 
-# Clone the repository
-git clone https://github.com/Mx7Zero/shopify-prime-reaction.git
+# Navigate to theme directory
 cd shopify-prime-reaction
 
-# Connect to your store and start development server
+# Connect to your store
 shopify theme dev --store your-store.myshopify.com
-```
 
-### Deploy to Production
-
-```bash
-# Push to live theme
+# Push changes to live theme
 shopify theme push --live
 ```
 
-## ⚙️ Theme Settings
+### Option 3: Direct Upload
+
+1. Download theme as ZIP
+2. Go to **Shopify Admin** → **Online Store** → **Themes**
+3. Click **Add theme** → **Upload ZIP file**
+
+---
+
+## ⚙️ Configuration
+
+### Theme Settings
 
 Access via **Shopify Admin** → **Online Store** → **Themes** → **Customize**
 
-### Colors
-- Primary, secondary, accent colors
-- Background and text colors
-- Border colors
+#### Colors
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Primary | Main brand color | `#1a1a1a` |
+| Secondary | Secondary color | `#f5f5f0` |
+| Accent | Highlight color | `#c9a87c` |
+| Background | Page background | `#ffffff` |
+| Text | Body text color | `#1a1a1a` |
 
-### Typography
-- Heading and body font selection
-- Text direction (LTR/RTL)
+#### Typography
+| Setting | Description |
+|---------|-------------|
+| Heading Font | Serif font for headlines |
+| Body Font | Sans-serif for body text |
+| Text Direction | LTR or RTL support |
 
-### Layout
-- Max page width (1000-1800px)
-- Section spacing
+#### Cart & Checkout
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Cart Type | Drawer or page | Drawer |
+| Free Shipping | Threshold amount | Disabled |
+| Order Notes | Allow notes | Enabled |
+| Upsells | Show recommendations | Enabled |
 
-### Cart
-- Cart type (drawer or page)
-- Order notes toggle
-- Upsell products
-- Free shipping threshold
+#### B2B & Quotes
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Enable Quotes | Show quote buttons | Enabled |
+| Hide Prices | Replace with "Request Quote" | Disabled |
+| Quote Email | Notification recipient | Store email |
 
-### B2B & Quotes
-- Enable/disable quote system
-- Hide prices option
-- Quote button text
-- Quote notification email
+#### Email Marketing
+| Setting | Description |
+|---------|-------------|
+| Platform | Seguno, Klaviyo, Mailchimp, HubSpot |
+| Klaviyo Key | Public API key for Klaviyo |
+| Popup | Enable/disable exit popup |
+| Back in Stock | Enable restock alerts |
 
-### SEO
-- Default social share image
-- Google/Bing/Pinterest verification
-- Local business schema (optional)
+#### Performance & SEO
+| Setting | Description | Default |
+|---------|-------------|---------|
+| Web Vitals | Track Core Web Vitals | Disabled |
+| Liquid Effects | Enable fluid animations | Enabled |
+| Site Verification | Google, Bing, Pinterest codes | — |
 
-## 🎨 Customization
+---
+
+## 🎨 Customization Guide
 
 ### CSS Custom Properties
 
-All design tokens are in `variables.css`:
+All design tokens are defined in `variables.css`:
 
 ```css
 :root {
   /* Colors */
   --color-primary: #1a1a1a;
+  --color-secondary: #f5f5f0;
+  --color-accent: #c9a87c;
   --color-background: #ffffff;
-  
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b6b6b;
+  --color-border: #e5e5e0;
+
   /* Typography */
-  --font-heading: 'Instrument Serif', serif;
-  --font-body: 'Inter', sans-serif;
-  
+  --font-heading: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-size-base: 1rem;
+
   /* Spacing */
   --space-1: 0.25rem;
+  --space-2: 0.5rem;
   --space-4: 1rem;
-  
+  --space-8: 2rem;
+
   /* Transitions */
+  --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 ```
 
-### Adding New Sections
+### Adding Liquid Effects
 
-1. Create a new `.liquid` file in `/sections/`
-2. Add schema at the bottom for settings
-3. Reference in templates via JSON
+Use data attributes to enable fluid animations:
 
-### Adding New Snippets
+```html
+<!-- Blob background -->
+<div data-liquid-blob>
+  <!-- Content -->
+</div>
 
-1. Create a new `.liquid` file in `/snippets/`
-2. Render in sections with `{% render 'snippet-name' %}`
+<!-- Wave divider -->
+<div data-liquid-wave class="liquid-wave-section"></div>
 
-## ♿ Accessibility
+<!-- Ripple on click -->
+<button data-ripple>Click me</button>
 
-This theme follows WCAG 2.1 AA guidelines:
+<!-- 3D hover effect -->
+<div data-liquid-hover>
+  <img src="..." alt="...">
+</div>
 
-- **Skip links** - Jump to main content and footer
-- **ARIA labels** - All interactive elements properly labeled
-- **Keyboard navigation** - Full keyboard support
-- **Focus indicators** - Visible focus states
-- **Reduced motion** - Respects `prefers-reduced-motion`
-- **High contrast** - Supports forced colors mode
-- **Screen reader** - ARIA live regions for dynamic updates
+<!-- Text reveal animation -->
+<h2 data-liquid-text>Animated Heading</h2>
+```
 
-## 📈 Performance
+### Creating New Sections
 
-- **Critical CSS** - Inline above-the-fold styles
-- **Lazy loading** - Images, videos, iframes
-- **Skeleton states** - Visual loading placeholders
-- **Deferred scripts** - Non-blocking JavaScript
-- **Preconnect** - Early connection to CDNs
-- **Native lazy loading** - Uses browser's native `loading="lazy"`
+1. Create file in `/sections/`:
+   ```liquid
+   <div class="my-section">
+     {{ section.settings.title }}
+   </div>
 
-## ✅ Development Phases
+   {% schema %}
+   {
+     "name": "My Section",
+     "settings": [
+       {
+         "type": "text",
+         "id": "title",
+         "label": "Title"
+       }
+     ]
+   }
+   {% endschema %}
+   ```
 
-### Phase 1: Foundation ✓
-- Theme scaffold and base CSS
+2. Add to templates via JSON or Theme Editor
+
+### Creating New Snippets
+
+1. Create file in `/snippets/`:
+   ```liquid
+   {%- comment -%}
+     My Snippet
+     @param title {String} - Title text
+   {%- endcomment -%}
+   
+   <div class="my-component">
+     {{ title }}
+   </div>
+   ```
+
+2. Render in sections:
+   ```liquid
+   {% render 'my-snippet', title: 'Hello' %}
+   ```
+
+---
+
+## 📈 Performance Optimization
+
+### Implemented Optimizations
+
+1. **Critical CSS** — Above-the-fold styles inlined in `<head>`
+2. **Lazy Loading** — Images, videos, iframes load on scroll
+3. **Preconnect** — Early connections to Shopify CDN, Google Fonts
+4. **Prefetch** — Next pages prefetched on link hover
+5. **Deferred Scripts** — All JS loads with `defer` attribute
+6. **Skeleton States** — Visual placeholders during load
+7. **Connection-Aware** — Adapts to slow networks
+
+### Core Web Vitals Targets
+
+| Metric | Target | Description |
+|--------|--------|-------------|
+| LCP | < 2.5s | Largest Contentful Paint |
+| FID | < 100ms | First Input Delay |
+| CLS | < 0.1 | Cumulative Layout Shift |
+| INP | < 200ms | Interaction to Next Paint |
+
+### Tips for Best Performance
+
+- Use WebP images where possible
+- Keep hero images under 200KB
+- Minimize third-party scripts
+- Enable performance tracking to monitor
+
+---
+
+## ♿ Accessibility Features
+
+### WCAG 2.1 AA Compliance
+
+- **Skip Links** — Jump to main content and footer
+- **ARIA Labels** — All interactive elements labeled
+- **Focus Indicators** — Visible `:focus-visible` styles
+- **Keyboard Navigation** — Full Tab support
+- **Screen Reader** — ARIA live regions for updates
+- **Reduced Motion** — Respects `prefers-reduced-motion`
+- **High Contrast** — Supports forced colors mode
+- **Alt Text** — Required for all images
+
+### Testing
+
+```bash
+# Run Lighthouse accessibility audit
+lighthouse https://your-store.myshopify.com --only-categories=accessibility
+
+# Test with axe DevTools
+# Install browser extension and run audit
+```
+
+---
+
+## 🔍 SEO Features
+
+### Structured Data (JSON-LD)
+
+- **Organization** — Business info, social links
+- **WebSite** — Site search integration
+- **BreadcrumbList** — Navigation path
+- **Product** — Price, availability, reviews
+- **Article** — Blog post markup
+- **CollectionPage** — Category listings
+- **ItemList** — Product lists in collections
+- **FAQPage** — Question/answer markup
+- **HowTo** — Training/tutorial steps
+- **VideoObject** — Product videos
+- **LocalBusiness** — Physical location (optional)
+
+### Meta Tags
+
+- Open Graph (Facebook, LinkedIn)
+- Twitter Cards (summary_large_image)
+- Canonical URLs
+- Pagination (prev/next)
+- Robots directives
+- Hreflang for multilingual
+
+---
+
+## 🛠️ Development Phases
+
+### ✅ Phase 1: Foundation & Core Structure
+- Theme scaffold (Online Store 2.0)
+- CSS architecture & variables
 - Typography system
 - Header & footer
-- Homepage sections
+- Dark/light mode
+- Mobile navigation
 
-### Phase 2: Products & Collections ✓
-- Product page template
-- Collection pages
-- Cart page
+### ✅ Phase 2: Homepage & Bento Grid
+- Hero slideshow
+- Bento grid layouts
+- Featured products
+- Scrolling marquee
+- Science explainer section
+- Newsletter signup
 
-### Phase 3: Customer & Pages ✓
-- Customer accounts (7 templates)
-- Contact, FAQ, About pages
-- 404 and Search
+### ✅ Phase 3: Product Pages
+- Product gallery with zoom
+- Variant picker (color-coded)
+- Size comparison tool
+- Add to cart (AJAX)
+- Back in stock signup
+- Related products
+- Reviews section
 
-### Phase 4: Enhancements ✓
-- Quote system (B2B)
-- AJAX cart drawer
+### ✅ Phase 4: Collection & Catalog
+- Collection grid/list views
+- Faceted filtering (AJAX)
 - Quick view modal
-- Faceted filtering
 - Infinite scroll
+- Price display logic
 
-### Phase 5: Polish & Performance ✓
+### ✅ Phase 5: Cart & Checkout
+- Cart drawer (slide-out)
+- Cart page (fallback)
+- Upsell recommendations
+- Shipping calculator
+- Cart notes
+- Trust badges
+
+### ✅ Phase 6: Quote System (B2B)
+- Quote button component
+- Quote form modal
+- Quote drawer
+- Quote cart conversion
+- B2B customer detection
+- Hide prices option
+
+### ✅ Phase 7: Supporting Pages
+- About/Story page
+- Contact page
+- FAQ page (accordion)
+- Product finder quiz
+- Training library
+- Facility locator
+- Shipping info
+
+### ✅ Phase 8: Search & Account
+- Predictive search
+- Search results page
+- Customer login/register
+- Account dashboard
+- Order history
+- Address book
+- Quote history (B2B)
+
+### ✅ Phase 9: Email Integration
+- Newsletter forms
+- Exit intent popup
+- Back in stock alerts
+- Email preferences
+- Multi-platform tracking
+- Browse abandonment
+
+### ✅ Phase 10: Polish & Performance
+- Lazy loading (images, video)
 - Skeleton loading states
-- Lazy loading
+- Micro-interactions
+- Liquid/water effects
+- Accessibility audit
+- Core Web Vitals
 - SEO meta tags
-- JSON-LD structured data
-- Accessibility improvements
+- JSON-LD schemas
 - Documentation
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Cart drawer not opening**
+- Check browser console for JS errors
+- Ensure `cart-drawer.js` is loaded
+- Verify cart drawer section is rendered
+
+**Images not lazy loading**
+- Add `loading="lazy"` or `data-src` attribute
+- Check IntersectionObserver support
+
+**Quote system not working**
+- Enable in Theme Settings → B2B & Quotes
+- Ensure quote sections are included
+
+**Dark mode not switching**
+- Check localStorage for `theme` key
+- Verify CSS custom properties in dark mode
+
+### Debug Mode
+
+Enable in Theme Settings → Performance & SEO → Debug Mode
+
+```javascript
+// Console will show:
+// [Web Vitals] LCP 1234 good
+// [Analytics] page_view { ... }
+```
+
+---
 
 ## 📄 License
 
-MIT License - Feel free to use and modify for your projects.
+MIT License — Feel free to use and modify for your projects.
+
+---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
 5. Open a Pull Request
 
 ---
 
-*Built with ❤️ for Prime Reaction*
+## 📞 Support
+
+- **Documentation**: This README
+- **Issues**: [GitHub Issues](https://github.com/Mx7Zero/shopify-prime-reaction/issues)
+- **Shopify Help**: [Shopify Help Center](https://help.shopify.com)
+
+---
+
+## 🙏 Credits
+
+- Design inspiration: [Post Familiar](https://postfamiliar.com/)
+- Fonts: [Google Fonts](https://fonts.google.com/) (Instrument Serif, Inter)
+- Icons: [Heroicons](https://heroicons.com/)
+
+---
+
+*Built with ❤️ for Reaxing Prime Reaction*
+
+*Last updated: January 2026 — Version 1.0.0*

@@ -1128,5 +1128,126 @@
         "info": "Automatically show the form when product is unavailable"
       }
     ]
+  },
+  {
+    "name": "Performance & SEO",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Performance Tracking"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_performance_tracking",
+        "label": "Enable Core Web Vitals tracking",
+        "default": false,
+        "info": "Track LCP, FID, CLS, INP metrics"
+      },
+      {
+        "type": "checkbox",
+        "id": "debug_mode",
+        "label": "Enable debug mode",
+        "default": false,
+        "info": "Log performance metrics to console"
+      },
+      {
+        "type": "header",
+        "content": "Visual Effects"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_liquid_effects",
+        "label": "Enable liquid/water effects",
+        "default": true,
+        "info": "Fluid motion animations throughout the site"
+      },
+      {
+        "type": "header",
+        "content": "SEO Site Verification"
+      },
+      {
+        "type": "text",
+        "id": "google_site_verification",
+        "label": "Google Site Verification",
+        "info": "Meta tag content value from Google Search Console"
+      },
+      {
+        "type": "text",
+        "id": "bing_site_verification",
+        "label": "Bing Site Verification",
+        "info": "Meta tag content value from Bing Webmaster Tools"
+      },
+      {
+        "type": "text",
+        "id": "pinterest_site_verification",
+        "label": "Pinterest Site Verification",
+        "info": "Meta tag content value from Pinterest"
+      },
+      {
+        "type": "text",
+        "id": "yandex_site_verification",
+        "label": "Yandex Site Verification",
+        "info": "Meta tag content value from Yandex Webmaster"
+      },
+      {
+        "type": "text",
+        "id": "facebook_domain_verification",
+        "label": "Facebook Domain Verification",
+        "info": "Domain verification code from Facebook Business"
+      },
+      {
+        "type": "header",
+        "content": "Social Sharing"
+      },
+      {
+        "type": "image_picker",
+        "id": "share_image",
+        "label": "Default share image",
+        "info": "Used when page has no featured image. Recommended: 1200x630px"
+      },
+      {
+        "type": "header",
+        "content": "Local Business Schema"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_local_business_schema",
+        "label": "Enable Local Business schema",
+        "default": false,
+        "info": "For businesses with physical locations"
+      },
+      {
+        "type": "textarea",
+        "id": "business_description",
+        "label": "Business description",
+        "info": "Brief description for schema markup"
+      },
+      {
+        "type": "text",
+        "id": "business_street",
+        "label": "Street address"
+      },
+      {
+        "type": "text",
+        "id": "business_city",
+        "label": "City"
+      },
+      {
+        "type": "text",
+        "id": "business_state",
+        "label": "State/Province"
+      },
+      {
+        "type": "text",
+        "id": "business_zip",
+        "label": "ZIP/Postal code"
+      },
+      {
+        "type": "text",
+        "id": "business_country",
+        "label": "Country",
+        "default": "US"
+      }
+    ]
   }
 ]

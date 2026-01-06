@@ -1,0 +1,338 @@
+{% comment %}
+  Performance Optimizations
+  Resource hints, preloading, and Core Web Vitals tracking
+  
+  Include in theme.liquid <head> early:
+  {% render 'performance' %}
+{% endcomment %}
+
+{%- comment -%} ========== DNS Prefetch & Preconnect ========== {%- endcomment -%}
+{%- comment -%} Shopify CDN - Critical {%- endcomment -%}
+<link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+<link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+
+{%- comment -%} Google Fonts {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+{%- comment -%} Analytics & Marketing - DNS Prefetch (lower priority) {%- endcomment -%}
+{%- if settings.gtm_container_id != blank -%}
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="dns-prefetch" href="https://www.google-analytics.com">
+{%- endif -%}
+
+{%- if settings.klaviyo_public_key != blank -%}
+<link rel="dns-prefetch" href="https://static.klaviyo.com">
+<link rel="dns-prefetch" href="https://a.klaviyo.com">
+{%- endif -%}
+
+{%- comment -%} ========== Preload Critical Assets ========== {%- endcomment -%}
+{%- comment -%} Critical CSS {%- endcomment -%}
+{{ 'variables.css' | asset_url | preload_tag: as: 'style' }}
+{{ 'base.css' | asset_url | preload_tag: as: 'style' }}
+
+{%- comment -%} Critical JS {%- endcomment -%}
+{{ 'global.js' | asset_url | preload_tag: as: 'script' }}
+
+{%- comment -%} Hero image preload (LCP optimization) {%- endcomment -%}
+{%- if template.name == 'index' -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'hero' and block.settings.image != blank -%}
+      {%- assign hero_image = block.settings.image | image_url: width: 1920 -%}
+<link rel="preload" as="image" href="{{ hero_image }}" fetchpriority="high">
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- elsif template.name == 'product' and product.featured_image != blank -%}
+  {%- assign product_image = product.featured_image | image_url: width: 1200 -%}
+<link rel="preload" as="image" href="{{ product_image }}" fetchpriority="high">
+{%- elsif template.name == 'collection' and collection.image != blank -%}
+  {%- assign collection_image = collection.image | image_url: width: 1920 -%}
+<link rel="preload" as="image" href="{{ collection_image }}" fetchpriority="high">
+{%- endif -%}
+
+{%- comment -%} ========== Prefetch Next Pages (speculative) ========== {%- endcomment -%}
+{%- if template.name == 'index' -%}
+  {%- comment -%} Prefetch popular destinations from homepage {%- endcomment -%}
+  {%- for collection in collections limit: 2 -%}
+<link rel="prefetch" href="{{ collection.url }}">
+  {%- endfor -%}
+{%- elsif template.name == 'collection' and collection.products.size > 0 -%}
+  {%- comment -%} Prefetch first product in collection {%- endcomment -%}
+<link rel="prefetch" href="{{ collection.products.first.url }}">
+{%- endif -%}
+
+{%- comment -%} ========== Module Preload for ES Modules ========== {%- endcomment -%}
+{%- comment -%} Uncomment if using ES modules
+<link rel="modulepreload" href="{{ 'app.js' | asset_url }}">
+{%- endcomment -%}
+
+{%- comment -%} ========== Core Web Vitals Tracking ========== {%- endcomment -%}
+<script>
+  /**
+   * Core Web Vitals Performance Tracking
+   * Measures LCP, FID, CLS, TTFB, INP
+   */
+  (function() {
+    'use strict';
+
+    // Only run in production or if explicitly enabled
+    if ({{ settings.enable_performance_tracking | default: false }} !== true) return;
+
+    const vitalsData = {
+      url: window.location.href,
+      template: '{{ template.name }}',
+      timestamp: Date.now()
+    };
+
+    // Helper to send data
+    function sendToAnalytics(metric) {
+      vitalsData[metric.name] = {
+        value: metric.value,
+        rating: metric.rating,
+        delta: metric.delta
+      };
+
+      // Send to dataLayer for GTM
+      if (window.dataLayer) {
+        window.dataLayer.push({
+          event: 'web_vitals',
+          metric_name: metric.name,
+          metric_value: metric.value,
+          metric_rating: metric.rating,
+          metric_delta: metric.delta
+        });
+      }
+
+      // Debug logging in development
+      if ({{ settings.debug_mode | default: false }}) {
+        console.log('[Web Vitals]', metric.name, metric.value, metric.rating);
+      }
+    }
+
+    // Load web-vitals library and track metrics
+    if ('PerformanceObserver' in window) {
+      // LCP - Largest Contentful Paint
+      try {
+        const lcpObserver = new PerformanceObserver((entryList) => {
+          const entries = entryList.getEntries();
+          const lastEntry = entries[entries.length - 1];
+          
+          const lcp = {
+            name: 'LCP',
+            value: Math.round(lastEntry.startTime),
+            rating: lastEntry.startTime <= 2500 ? 'good' : lastEntry.startTime <= 4000 ? 'needs-improvement' : 'poor'
+          };
+          
+          sendToAnalytics(lcp);
+        });
+        lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+      } catch (e) {}
+
+      // FID - First Input Delay
+      try {
+        const fidObserver = new PerformanceObserver((entryList) => {
+          const entries = entryList.getEntries();
+          const firstEntry = entries[0];
+          
+          const fid = {
+            name: 'FID',
+            value: Math.round(firstEntry.processingStart - firstEntry.startTime),
+            rating: firstEntry.processingStart - firstEntry.startTime <= 100 ? 'good' : 
+                    firstEntry.processingStart - firstEntry.startTime <= 300 ? 'needs-improvement' : 'poor'
+          };
+          
+          sendToAnalytics(fid);
+        });
+        fidObserver.observe({ type: 'first-input', buffered: true });
+      } catch (e) {}
+
+      // CLS - Cumulative Layout Shift
+      try {
+        let clsValue = 0;
+        const clsObserver = new PerformanceObserver((entryList) => {
+          for (const entry of entryList.getEntries()) {
+            if (!entry.hadRecentInput) {
+              clsValue += entry.value;
+            }
+          }
+        });
+        clsObserver.observe({ type: 'layout-shift', buffered: true });
+
+        // Report CLS on page hide
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden') {
+            const cls = {
+              name: 'CLS',
+              value: Math.round(clsValue * 1000) / 1000,
+              rating: clsValue <= 0.1 ? 'good' : clsValue <= 0.25 ? 'needs-improvement' : 'poor'
+            };
+            sendToAnalytics(cls);
+          }
+        });
+      } catch (e) {}
+
+      // INP - Interaction to Next Paint
+      try {
+        let inpValue = 0;
+        const inpObserver = new PerformanceObserver((entryList) => {
+          for (const entry of entryList.getEntries()) {
+            if (entry.duration > inpValue) {
+              inpValue = entry.duration;
+            }
+          }
+        });
+        inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 16 });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden') {
+            const inp = {
+              name: 'INP',
+              value: Math.round(inpValue),
+              rating: inpValue <= 200 ? 'good' : inpValue <= 500 ? 'needs-improvement' : 'poor'
+            };
+            sendToAnalytics(inp);
+          }
+        });
+      } catch (e) {}
+    }
+
+    // TTFB - Time to First Byte (Navigation Timing)
+    window.addEventListener('load', () => {
+      try {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        if (navigation) {
+          const ttfb = {
+            name: 'TTFB',
+            value: Math.round(navigation.responseStart),
+            rating: navigation.responseStart <= 800 ? 'good' : 
+                    navigation.responseStart <= 1800 ? 'needs-improvement' : 'poor'
+          };
+          sendToAnalytics(ttfb);
+
+          // Also track total page load time
+          const pageLoad = {
+            name: 'PageLoad',
+            value: Math.round(navigation.loadEventEnd - navigation.startTime),
+            rating: 'info'
+          };
+          sendToAnalytics(pageLoad);
+        }
+      } catch (e) {}
+    });
+  })();
+</script>
+
+{%- comment -%} ========== Resource Hints Script ========== {%- endcomment -%}
+<script>
+  /**
+   * Dynamic Resource Hints
+   * Prefetch/prerender on link hover for instant navigation
+   */
+  (function() {
+    'use strict';
+
+    // Skip if save-data is on
+    if (navigator.connection && navigator.connection.saveData) return;
+
+    const prefetchedUrls = new Set();
+    let hoverTimer = null;
+
+    function prefetchUrl(url) {
+      if (prefetchedUrls.has(url)) return;
+      if (url.includes('/cart') || url.includes('/checkout')) return;
+
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      document.head.appendChild(link);
+      prefetchedUrls.add(url);
+    }
+
+    // Prefetch on hover with delay
+    document.addEventListener('mouseover', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      
+      const url = link.href;
+      if (!url.startsWith(window.location.origin)) return;
+      if (url === window.location.href) return;
+
+      hoverTimer = setTimeout(() => prefetchUrl(url), 65);
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
+    });
+
+    // Prefetch on touchstart (mobile)
+    document.addEventListener('touchstart', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      
+      const url = link.href;
+      if (url.startsWith(window.location.origin) && url !== window.location.href) {
+        prefetchUrl(url);
+      }
+    }, { passive: true });
+  })();
+</script>
+
+{%- comment -%} ========== Connection-Aware Loading ========== {%- endcomment -%}
+<script>
+  /**
+   * Connection-Aware Loading
+   * Adjust loading behavior based on connection quality
+   */
+  (function() {
+    'use strict';
+
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    
+    if (connection) {
+      const effectiveType = connection.effectiveType;
+      const saveData = connection.saveData;
+      
+      // Add classes for CSS-based adaptations
+      if (saveData || effectiveType === 'slow-2g' || effectiveType === '2g') {
+        document.documentElement.classList.add('slow-connection');
+        document.documentElement.classList.add('reduce-data');
+      } else if (effectiveType === '3g') {
+        document.documentElement.classList.add('moderate-connection');
+      } else {
+        document.documentElement.classList.add('fast-connection');
+      }
+
+      // Store for JS use
+      window.connectionQuality = {
+        type: effectiveType,
+        saveData: saveData,
+        downlink: connection.downlink,
+        rtt: connection.rtt
+      };
+    }
+  })();
+</script>
+
+<style>
+  /* Connection-aware image loading */
+  .slow-connection img:not([loading="eager"]),
+  .reduce-data img:not([loading="eager"]) {
+    content-visibility: auto;
+  }
+  
+  /* Disable animations on slow connections */
+  .slow-connection *,
+  .reduce-data * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  
+  /* Reduce image quality hints */
+  .reduce-data img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+</style>
