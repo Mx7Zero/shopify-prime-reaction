@@ -52,6 +52,27 @@
     display: block;
   }
 
+  /* CRITICAL: Ensure animated elements are visible even without JS */
+  [data-animate],
+  [data-animate-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Re-enable animations once JS loads */
+  .js [data-animate],
+  .js [data-animate-stagger] > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  .js [data-animate].is-visible,
+  .js [data-animate-stagger].is-visible > * {
+    opacity: 1;
+    transform: none;
+  }
+
   /* Critical Layout */
   .container {
     width: 100%;
